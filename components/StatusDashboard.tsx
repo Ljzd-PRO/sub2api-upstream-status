@@ -5,9 +5,7 @@ import {
   AlertTriangle,
   CalendarDays,
   Clock3,
-  Database,
   Eye,
-  Hash,
   RefreshCw,
   Search,
   ShieldCheck,
@@ -229,85 +227,101 @@ export function StatusDashboard() {
       <section className="summary-grid" aria-label={t("common.accounts")}>
         <SummaryTile label={t("summary.accounts")} value={data?.summary.total ?? 0} icon={<Activity size={18} />} />
         <SummaryTile label={t("summary.schedulable")} value={data?.summary.schedulable ?? 0} icon={<ShieldCheck size={18} />} />
-        <SummaryTile label={t("summary.calls5h")} value={formatCompactNumber(data?.summary.fiveHour.requests ?? 0, locale)} icon={<Clock3 size={18} />} />
-        <SummaryTile label={t("summary.tokens5h")} value={formatCompactNumber(data?.summary.fiveHour.tokens ?? 0, locale)} icon={<Database size={18} />} />
-        <SummaryTile label={t("summary.calls7d")} value={formatCompactNumber(data?.summary.sevenDay.requests ?? 0, locale)} icon={<CalendarDays size={18} />} />
-        <SummaryTile label={t("summary.tokens7d")} value={formatCompactNumber(data?.summary.sevenDay.tokens ?? 0, locale)} icon={<Hash size={18} />} />
+        <SummaryUsageTile
+          label={t("window.5h")}
+          requests={data?.summary.fiveHour.requests ?? 0}
+          tokens={data?.summary.fiveHour.tokens ?? 0}
+          icon={<Clock3 size={18} />}
+          locale={locale}
+          t={t}
+        />
+        <SummaryUsageTile
+          label={t("window.7d")}
+          requests={data?.summary.sevenDay.requests ?? 0}
+          tokens={data?.summary.sevenDay.tokens ?? 0}
+          icon={<CalendarDays size={18} />}
+          locale={locale}
+          t={t}
+        />
         <SummaryTile label={t("summary.warning")} value={data?.summary.warning ?? 0} icon={<AlertTriangle size={18} />} />
         <SummaryTile label={t("summary.unavailable")} value={data?.summary.unavailable ?? 0} icon={<SlidersHorizontal size={18} />} />
       </section>
 
       <section className="toolbar" aria-label={t("filters.label")}>
-        <label className="search-box">
-          <Search size={17} aria-hidden />
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={t("filters.search")}
-          />
-        </label>
+        <div className="toolbar__filters">
+          <label className="search-box">
+            <Search size={17} aria-hidden />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={t("filters.search")}
+            />
+          </label>
 
-        <select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label={t("filters.platform")}>
-          <option value="all">{t("filters.allPlatforms")}</option>
-          {platforms.map((item) => (
-            <option key={item} value={item}>
-              {platformLabel(item)}
-            </option>
-          ))}
-        </select>
+          <select value={platform} onChange={(event) => setPlatform(event.target.value)} aria-label={t("filters.platform")}>
+            <option value="all">{t("filters.allPlatforms")}</option>
+            {platforms.map((item) => (
+              <option key={item} value={item}>
+                {platformLabel(item)}
+              </option>
+            ))}
+          </select>
 
-        <select value={health} onChange={(event) => setHealth(event.target.value as HealthFilter)} aria-label={t("filters.health")}>
-          <option value="all">{t("filters.allHealth")}</option>
-          <option value="ok">{t("health.ok")}</option>
-          <option value="warning">{t("health.warning")}</option>
-          <option value="exhausted">{t("health.exhausted")}</option>
-          <option value="unavailable">{t("health.unavailable")}</option>
-        </select>
+          <select value={health} onChange={(event) => setHealth(event.target.value as HealthFilter)} aria-label={t("filters.health")}>
+            <option value="all">{t("filters.allHealth")}</option>
+            <option value="ok">{t("health.ok")}</option>
+            <option value="warning">{t("health.warning")}</option>
+            <option value="exhausted">{t("health.exhausted")}</option>
+            <option value="unavailable">{t("health.unavailable")}</option>
+          </select>
 
-        <select
-          value={localeChoice}
-          onChange={(event) => setLocaleChoice(event.target.value as LocaleChoice)}
-          aria-label={t("filters.language")}
-        >
-          <option value="auto">{t("language.auto")}</option>
-          {appLocales.map((item) => (
-            <option key={item} value={item}>
-              {languageLabel(item)}
-            </option>
-          ))}
-        </select>
+          <select
+            value={localeChoice}
+            onChange={(event) => setLocaleChoice(event.target.value as LocaleChoice)}
+            aria-label={t("filters.language")}
+          >
+            <option value="auto">{t("language.auto")}</option>
+            {appLocales.map((item) => (
+              <option key={item} value={item}>
+                {languageLabel(item)}
+              </option>
+            ))}
+          </select>
 
-        <select
-          className="time-zone-select"
-          value={timeZoneChoice}
-          onChange={(event) => setTimeZoneChoice(event.target.value as TimeZoneChoice)}
-          aria-label={t("filters.timeZone")}
-        >
-          <option value="auto">{t("timezone.auto")} ({detectedTimeZone})</option>
-          {timeZoneOptions.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
+          <select
+            className="time-zone-select"
+            value={timeZoneChoice}
+            onChange={(event) => setTimeZoneChoice(event.target.value as TimeZoneChoice)}
+            aria-label={t("filters.timeZone")}
+          >
+            <option value="auto">{t("timezone.auto")} ({detectedTimeZone})</option>
+            {timeZoneOptions.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <label className="auto-refresh-control">
-          <input
-            type="checkbox"
-            checked={autoRefreshEnabled}
-            onChange={(event) => setAutoRefreshEnabled(event.target.checked)}
-            aria-label={t("refresh.auto")}
-          />
-          <span>{t("refresh.auto")}</span>
-          <strong>
-            {autoRefreshEnabled
-              ? `${t("refresh.nextIn")} ${formatRefreshCountdown(remainingSeconds, t)}`
-              : t("refresh.paused")}
-          </strong>
-        </label>
+        <div className="toolbar__status">
+          <label className="auto-refresh-control">
+            <input
+              type="checkbox"
+              checked={autoRefreshEnabled}
+              onChange={(event) => setAutoRefreshEnabled(event.target.checked)}
+              aria-label={t("refresh.auto")}
+            />
+            <span>{t("refresh.auto")}</span>
+            <strong>
+              {autoRefreshEnabled
+                ? `${t("refresh.nextIn")} ${formatRefreshCountdown(remainingSeconds, t)}`
+                : t("refresh.paused")}
+            </strong>
+          </label>
 
-        <div className="toolbar__timestamp">
-          {t("common.updated")} {formatDateTime(data?.generatedAt ?? null, locale, t("common.unknown"), timeZone)}
+          <div className="toolbar__timestamp">
+            {t("common.updated")} {formatDateTime(data?.generatedAt ?? null, locale, t("common.unknown"), timeZone)}
+          </div>
         </div>
       </section>
 
@@ -356,6 +370,37 @@ function SummaryTile({ label, value, icon }: { label: string; value: number | st
       <div>
         <span>{label}</span>
         <strong>{value}</strong>
+      </div>
+    </div>
+  );
+}
+
+function SummaryUsageTile({
+  label,
+  requests,
+  tokens,
+  icon,
+  locale,
+  t
+}: {
+  label: string;
+  requests: number;
+  tokens: number;
+  icon: React.ReactNode;
+  locale: AppLocale;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  return (
+    <div className="summary-tile summary-tile--usage">
+      <div className="summary-tile__icon">{icon}</div>
+      <div>
+        <span>{label}</span>
+        <div className="summary-usage">
+          <strong>{formatCompactNumber(requests, locale)}</strong>
+          <small>{t("account.windowRequests")}</small>
+          <strong>{formatCompactNumber(tokens, locale)}</strong>
+          <small>{t("account.windowTokens")}</small>
+        </div>
       </div>
     </div>
   );

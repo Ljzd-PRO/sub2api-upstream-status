@@ -129,7 +129,7 @@ button:disabled {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 14px;
 }
@@ -170,23 +170,65 @@ button:disabled {
   line-height: 1;
 }
 
+.summary-tile--usage {
+  align-items: flex-start;
+}
+
+.summary-usage {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 3px;
+  align-items: baseline;
+  margin-top: 6px;
+}
+
+.summary-usage strong {
+  margin-top: 0;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.summary-usage small {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .toolbar {
   display: grid;
-  grid-template-columns:
-    minmax(220px, 1fr)
-    minmax(135px, 170px)
-    minmax(135px, 170px)
-    minmax(120px, 155px)
-    minmax(180px, 230px)
-    minmax(210px, 240px)
-    auto;
-  gap: 10px;
-  align-items: center;
+  gap: 12px;
   margin-bottom: 16px;
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.82);
+}
+
+.toolbar__filters {
+  display: grid;
+  grid-template-columns:
+    minmax(260px, 1.35fr)
+    minmax(135px, 170px)
+    minmax(135px, 170px)
+    minmax(120px, 155px)
+    minmax(220px, 270px);
+  gap: 10px;
+  align-items: center;
+}
+
+.toolbar__status {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
 }
 
 .search-box {
@@ -227,7 +269,7 @@ button:disabled {
 
 .auto-refresh-control {
   display: flex;
-  min-width: 0;
+  min-width: min(100%, 300px);
   height: 40px;
   align-items: center;
   gap: 8px;
@@ -382,16 +424,14 @@ button:disabled {
   font-size: 12px;
 }
 
-.account-card__totals,
-.account-card__window-totals {
+.account-card__totals {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
 
-.account-card__totals div,
-.window-total {
+.account-card__totals div {
   min-width: 0;
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -399,15 +439,13 @@ button:disabled {
   background: var(--surface-muted);
 }
 
-.account-card__totals span,
-.window-total span {
+.account-card__totals span {
   display: block;
   color: var(--muted);
   font-size: 12px;
 }
 
-.account-card__totals strong,
-.window-total strong {
+.account-card__totals strong {
   display: block;
   min-width: 0;
   margin-top: 3px;
@@ -417,35 +455,6 @@ button:disabled {
   line-height: 1.1;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.window-total__label {
-  margin-bottom: 8px;
-  color: var(--muted-strong) !important;
-  font-size: 13px !important;
-  font-weight: 760;
-}
-
-.window-total__values {
-  display: grid;
-  grid-template-columns: minmax(52px, 0.65fr) minmax(0, 1fr);
-  gap: 8px;
-  align-items: baseline;
-}
-
-.window-total__values + .window-total__values {
-  margin-top: 6px;
-}
-
-.window-total__values span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.window-total__values strong {
-  margin-top: 0;
-  text-align: right;
 }
 
 .window-list {
@@ -525,6 +534,7 @@ button:disabled {
 }
 
 .window-meter__stats {
+  flex-wrap: wrap;
   justify-content: flex-start;
   margin-top: 7px;
   color: var(--muted);
@@ -624,17 +634,20 @@ button:disabled {
 
 @media (max-width: 900px) {
   .summary-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .toolbar {
+  .toolbar__filters {
     grid-template-columns: 1fr 1fr;
   }
 
-  .search-box,
-  .auto-refresh-control,
-  .toolbar__timestamp {
+  .search-box {
     grid-column: 1 / -1;
+  }
+
+  .toolbar__status {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
@@ -657,7 +670,7 @@ button:disabled {
     width: 100%;
   }
 
-  .toolbar,
+  .toolbar__filters,
   .account-grid {
     grid-template-columns: 1fr;
   }
@@ -700,8 +713,7 @@ button:disabled {
     font-size: 24px;
   }
 
-  .account-card__totals,
-  .account-card__window-totals {
+  .account-card__totals {
     grid-template-columns: 1fr;
   }
 
