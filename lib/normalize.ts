@@ -173,6 +173,7 @@ function normalizeWindow(
       label,
       available: false,
       utilization: null,
+      recommendedUtilization: null,
       state: "unknown",
       resetsAt: null,
       remainingSeconds: null,
@@ -185,12 +186,14 @@ function normalizeWindow(
   const remainingSeconds = computeRemainingSeconds(progress.remaining_seconds, resetAt, now);
   const expired = resetAt ? resetAt.getTime() <= now.getTime() : false;
   const utilization = hasUtilization ? (expired ? 0 : roundOne(Math.max(0, Number(progress.utilization)))) : null;
+  const recommendedUtilization = expired ? 0 : computeRecommendedUtilization(key, remainingSeconds);
 
   return {
     key,
     label,
     available: true,
     utilization,
+    recommendedUtilization,
     state: utilization == null ? "unknown" : utilizationState(utilization),
     resetsAt: resetAt?.toISOString() ?? null,
     remainingSeconds: expired ? 0 : remainingSeconds,
@@ -209,6 +212,14 @@ function normalizeWindowStats(stats: Sub2APIWindowStats | null): Sub2APIWindowSt
     standard_cost: numberFromUnknown(stats.standard_cost) ?? 0,
     user_cost: numberFromUnknown(stats.user_cost) ?? 0
   };
+}
+
+function computeRecommendedUtilization(key: "5h" | "7d", remainingSeconds: number | null): number | null {
+  if (remainingSeconds == null) return null;
+
+  const windowSeconds = key === "5h" ? FIVE_HOUR_SECONDS : SEVEN_DAY_SECONDS;
+  const boundedRemaining = Math.max(0, Math.min(windowSeconds, remainingSeconds));
+  return roundOne((1 - boundedRemaining / windowSeconds) * 100);
 }
 
 function deriveHealth(

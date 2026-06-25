@@ -87,7 +87,22 @@ describe("normalizeAccount", () => {
     const status = normalizeAccount(account, buildOpenAIUsageFromExtra(account, now), null, now);
 
     expect(status.health).toBe("warning");
+    expect(status.windows.fiveHour.recommendedUtilization).toBe(60);
+    expect(status.windows.sevenDay.recommendedUtilization).toBe(41.7);
     expect(status.windows.sevenDay.state).toBe("danger");
+  });
+
+  it("zeros recommended usage for expired windows", () => {
+    const account = baseAccount({
+      extra: {
+        codex_5h_used_percent: 88,
+        codex_5h_reset_at: "2026-03-16T10:00:00Z"
+      }
+    });
+    const status = normalizeAccount(account, buildOpenAIUsageFromExtra(account, now), null, now);
+
+    expect(status.windows.fiveHour.utilization).toBe(0);
+    expect(status.windows.fiveHour.recommendedUtilization).toBe(0);
   });
 
   it("marks future rate limits as exhausted", () => {

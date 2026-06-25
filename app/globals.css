@@ -516,11 +516,25 @@ button:disabled {
   background: #e5eaf0;
 }
 
+.meter-track__recommended,
 .meter-track__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
   height: 100%;
   border-radius: inherit;
-  background: var(--green);
   transition: width 220ms ease;
+}
+
+.meter-track__recommended {
+  z-index: 1;
+  background: #bbf7d0;
+}
+
+.meter-track__fill {
+  z-index: 2;
+  background: var(--green);
 }
 
 .window-meter[data-state="warning"] .meter-track__fill {
@@ -539,6 +553,30 @@ button:disabled {
 .window-meter__meta {
   color: var(--muted);
   font-size: 12px;
+}
+
+.window-meter__recommendation {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.window-meter__recommendation span {
+  color: #166534;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.window-meter__recommendation small {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 .window-meter__meta span:first-child,

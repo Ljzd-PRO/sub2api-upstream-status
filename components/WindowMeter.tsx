@@ -15,6 +15,7 @@ interface WindowMeterProps {
 
 export function WindowMeter({ window, locale, timeZone, t }: WindowMeterProps) {
   const value = Math.max(0, Math.min(100, window.utilization ?? 0));
+  const recommendedValue = Math.max(0, Math.min(100, window.recommendedUtilization ?? 0));
   const hasStats = window.stats !== null;
   const label = window.key === "5h" ? t("window.5h") : t("window.7d");
 
@@ -29,7 +30,17 @@ export function WindowMeter({ window, locale, timeZone, t }: WindowMeterProps) {
       </div>
 
       <div className="meter-track" aria-label={`${label} ${t("window.usage")}`}>
+        {window.recommendedUtilization !== null ? (
+          <div className="meter-track__recommended" style={{ width: `${recommendedValue}%` }} />
+        ) : null}
         <div className="meter-track__fill" style={{ width: `${value}%` }} />
+      </div>
+
+      <div className="window-meter__recommendation">
+        <span>
+          {t("window.recommended")} {formatPercent(window.recommendedUtilization, t("common.noData"))}
+        </span>
+        <small>{t("window.recommendedHelp")}</small>
       </div>
 
       <div className="window-meter__meta">

@@ -99,6 +99,7 @@ export interface PanelUsageWindow {
   label: string;
   available: boolean;
   utilization: number | null;
+  recommendedUtilization: number | null;
   state: WindowState;
   resetsAt: string | null;
   remainingSeconds: number | null;
