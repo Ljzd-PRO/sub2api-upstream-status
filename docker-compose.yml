@@ -1,0 +1,9 @@
+services:
+  sub2api-upstream-status:
+    build: .
+    container_name: sub2api-upstream-status
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
