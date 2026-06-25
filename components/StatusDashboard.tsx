@@ -16,12 +16,13 @@ import { formatCompactNumber, formatDateTime, platformLabel } from "@/lib/format
 import { appLocales, useI18n, type AppLocale, type LocaleChoice } from "@/lib/i18n";
 import {
   autoRefreshStorageKey,
+  liveRefreshIntervalSeconds,
   normalizeRefreshIntervalSeconds,
   secondsUntil,
   shouldAutoRefresh
 } from "@/lib/refresh";
 import { useTimeZone, type TimeZoneChoice } from "@/lib/timezone";
-import type { HealthStatus, PanelPayload } from "@/lib/types";
+import type { HealthStatus, LiveConcurrencyPayload, PanelPayload } from "@/lib/types";
 
 type HealthFilter = "all" | HealthStatus;
 
@@ -41,6 +42,7 @@ export function StatusDashboard() {
   const [nextRefreshAt, setNextRefreshAt] = useState<number | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const inFlight = useRef(false);
+  const liveInFlight = useRef(false);
   const dataRef = useRef<PanelPayload | null>(null);
   const autoRefreshEnabledRef = useRef(true);
   const { choice: localeChoice, locale, setChoice: setLocaleChoice, t } = useI18n();
@@ -145,6 +147,69 @@ export function StatusDashboard() {
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [load, nextRefreshAt]);
+
+  const loadLiveConcurrency = useCallback(async () => {
+    if (liveInFlight.current) return;
+    if (!dataRef.current) return;
+
+    liveInFlight.current = true;
+
+    try {
+      const response = await fetch("/api/upstream-status/live", { cache: "no-store" });
+      const payload = (await response.json()) as LiveConcurrencyPayload | ApiError;
+      if (!response.ok || !("accounts" in payload)) return;
+
+      const liveConcurrencyById = new Map(
+        payload.accounts.map((account) => [account.id, account.concurrency] as const)
+      );
+      const current = dataRef.current;
+      if (!current) return;
+
+      const nextAccounts = current.accounts.map((account) => {
+        const liveConcurrency = liveConcurrencyById.get(account.id);
+        if (!liveConcurrency) return account;
+        return {
+          ...account,
+          concurrency: liveConcurrency
+        };
+      });
+
+      const nextData = {
+        ...current,
+        accounts: nextAccounts
+      };
+      dataRef.current = nextData;
+      setData(nextData);
+    } catch {
+      // Best-effort live concurrency sync.
+    } finally {
+      liveInFlight.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!autoRefreshEnabled || !data?.accounts.length) return;
+
+    void loadLiveConcurrency();
+
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void loadLiveConcurrency();
+      }
+    }, liveRefreshIntervalSeconds * 1000);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void loadLiveConcurrency();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [autoRefreshEnabled, data?.accounts.length, loadLiveConcurrency]);
 
   const setAutoRefreshEnabled = useCallback(
     (enabled: boolean) => {

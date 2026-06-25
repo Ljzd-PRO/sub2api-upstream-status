@@ -169,3 +169,13 @@ export interface AccountFetchResult {
   account: PanelAccountStatus | null;
   error: string | null;
 }
+
+export interface LiveConcurrencyAccount {
+  id: number;
+  concurrency: PanelConcurrency | null;
+}
+
+export interface LiveConcurrencyPayload {
+  generatedAt: string;
+  accounts: LiveConcurrencyAccount[];
+}

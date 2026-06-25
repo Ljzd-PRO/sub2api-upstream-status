@@ -159,7 +159,7 @@ function normalizeTotals(stats: Sub2APIAccountStats | null): PanelAccountTotals 
   };
 }
 
-function normalizeConcurrency(account: Sub2APIAccount): PanelConcurrency {
+export function normalizeConcurrency(account: Sub2APIAccount): PanelConcurrency {
   const record = account as unknown as Record<string, unknown>;
   const extra = (account.extra ?? {}) as Record<string, unknown>;
   const limit = integerFromFirst(
