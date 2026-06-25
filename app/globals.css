@@ -129,21 +129,26 @@ button:disabled {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 14px;
 }
 
 .summary-tile {
   display: flex;
-  min-height: 88px;
+  min-height: 108px;
   align-items: center;
   gap: 12px;
-  padding: 16px;
+  padding: 18px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.86);
   box-shadow: 0 10px 28px rgba(31, 41, 55, 0.06);
+}
+
+.summary-tile > div:last-child {
+  min-width: 0;
+  width: 100%;
 }
 
 .summary-tile__icon {
@@ -170,33 +175,44 @@ button:disabled {
   line-height: 1;
 }
 
-.summary-tile--usage {
-  align-items: flex-start;
-}
-
-.summary-usage {
-  display: grid;
-  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-  column-gap: 8px;
-  row-gap: 3px;
-  align-items: baseline;
-  margin-top: 6px;
-}
-
-.summary-usage strong {
-  margin-top: 0;
-  font-size: 22px;
-  line-height: 1;
-}
-
-.summary-usage small {
-  min-width: 0;
+.summary-tile small {
+  display: block;
+  margin-top: 8px;
   overflow: hidden;
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.summary-tile--usage {
+  align-items: center;
+}
+
+.summary-usage {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.summary-usage div {
+  min-width: 0;
+}
+
+.summary-usage strong {
+  display: block;
+  margin-top: 0;
+  overflow: hidden;
+  font-size: 24px;
+  line-height: 1.04;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-usage small {
+  margin: 0 0 5px;
 }
 
 .toolbar {
@@ -634,7 +650,7 @@ button:disabled {
 
 @media (max-width: 900px) {
   .summary-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .toolbar__filters {
@@ -697,8 +713,8 @@ button:disabled {
   }
 
   .summary-tile {
-    min-height: 76px;
-    flex: 0 0 148px;
+    min-height: 92px;
+    flex: 0 0 230px;
     padding: 12px;
     scroll-snap-align: start;
   }

@@ -7,9 +7,7 @@ import {
   Clock3,
   Eye,
   RefreshCw,
-  Search,
-  ShieldCheck,
-  SlidersHorizontal
+  Search
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -225,8 +223,12 @@ export function StatusDashboard() {
       ) : null}
 
       <section className="summary-grid" aria-label={t("common.accounts")}>
-        <SummaryTile label={t("summary.accounts")} value={data?.summary.total ?? 0} icon={<Activity size={18} />} />
-        <SummaryTile label={t("summary.schedulable")} value={data?.summary.schedulable ?? 0} icon={<ShieldCheck size={18} />} />
+        <SummaryTile
+          label={t("summary.accounts")}
+          value={data?.summary.total ?? 0}
+          detail={`${t("summary.schedulable")} ${data?.summary.schedulable ?? 0}`}
+          icon={<Activity size={18} />}
+        />
         <SummaryUsageTile
           label={t("window.5h")}
           requests={data?.summary.fiveHour.requests ?? 0}
@@ -243,8 +245,12 @@ export function StatusDashboard() {
           locale={locale}
           t={t}
         />
-        <SummaryTile label={t("summary.warning")} value={data?.summary.warning ?? 0} icon={<AlertTriangle size={18} />} />
-        <SummaryTile label={t("summary.unavailable")} value={data?.summary.unavailable ?? 0} icon={<SlidersHorizontal size={18} />} />
+        <SummaryTile
+          label={t("summary.health")}
+          value={data?.summary.warning ?? 0}
+          detail={`${t("summary.unavailable")} ${data?.summary.unavailable ?? 0}`}
+          icon={<AlertTriangle size={18} />}
+        />
       </section>
 
       <section className="toolbar" aria-label={t("filters.label")}>
@@ -363,13 +369,24 @@ function languageLabel(locale: AppLocale): string {
   }
 }
 
-function SummaryTile({ label, value, icon }: { label: string; value: number | string; icon: React.ReactNode }) {
+function SummaryTile({
+  label,
+  value,
+  detail,
+  icon
+}: {
+  label: string;
+  value: number | string;
+  detail?: string;
+  icon: React.ReactNode;
+}) {
   return (
     <div className="summary-tile">
       <div className="summary-tile__icon">{icon}</div>
       <div>
         <span>{label}</span>
         <strong>{value}</strong>
+        {detail ? <small>{detail}</small> : null}
       </div>
     </div>
   );
@@ -396,10 +413,14 @@ function SummaryUsageTile({
       <div>
         <span>{label}</span>
         <div className="summary-usage">
-          <strong>{formatCompactNumber(requests, locale)}</strong>
-          <small>{t("account.windowRequests")}</small>
-          <strong>{formatCompactNumber(tokens, locale)}</strong>
-          <small>{t("account.windowTokens")}</small>
+          <div>
+            <small>{t("account.windowRequests")}</small>
+            <strong>{formatCompactNumber(requests, locale)}</strong>
+          </div>
+          <div>
+            <small>{t("account.windowTokens")}</small>
+            <strong>{formatCompactNumber(tokens, locale)}</strong>
+          </div>
         </div>
       </div>
     </div>
