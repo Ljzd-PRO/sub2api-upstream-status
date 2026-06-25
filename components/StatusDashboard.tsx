@@ -190,6 +190,10 @@ export function StatusDashboard() {
       ? data.title
       : t("app.title");
 
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+
   return (
     <main className="dashboard-shell">
       <header className="dashboard-header">
