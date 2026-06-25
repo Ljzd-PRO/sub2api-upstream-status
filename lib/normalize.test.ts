@@ -146,6 +146,45 @@ describe("normalizeAccount", () => {
     });
   });
 
+  it("normalizes concurrency capacity and occupancy", () => {
+    const status = normalizeAccount(
+      baseAccount({
+        concurrency: 8,
+        current_concurrency: 6
+      }),
+      null,
+      null,
+      now
+    );
+
+    expect(status.concurrency).toMatchObject({
+      available: true,
+      used: 6,
+      limit: 8,
+      utilization: 75,
+      state: "warning"
+    });
+  });
+
+  it("keeps capacity-only concurrency available without inventing occupancy", () => {
+    const status = normalizeAccount(
+      baseAccount({
+        concurrency: 4
+      }),
+      null,
+      null,
+      now
+    );
+
+    expect(status.concurrency).toMatchObject({
+      available: true,
+      used: null,
+      limit: 4,
+      utilization: null,
+      state: "unknown"
+    });
+  });
+
   it("aggregates today totals in the summary", () => {
     const first = normalizeAccount(baseAccount({ id: 1 }), null, null, now, { requests: 2, tokens: 100 });
     const second = normalizeAccount(baseAccount({ id: 2 }), null, null, now, { requests: 3, tokens: 250 });

@@ -204,11 +204,10 @@ button:disabled {
 .summary-usage strong {
   display: block;
   margin-top: 0;
-  overflow: hidden;
   font-size: 24px;
   line-height: 1.04;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .summary-usage small {
@@ -478,10 +477,12 @@ button:disabled {
   gap: 18px;
 }
 
+.concurrency-meter,
 .window-meter {
   min-width: 0;
 }
 
+.concurrency-meter__top,
 .window-meter__top,
 .window-meter__meta,
 .window-meter__stats,
@@ -492,6 +493,7 @@ button:disabled {
   gap: 10px;
 }
 
+.concurrency-meter__label,
 .window-meter__label {
   display: inline-flex;
   min-width: 0;
@@ -502,6 +504,7 @@ button:disabled {
   font-weight: 700;
 }
 
+.concurrency-meter strong,
 .window-meter strong {
   color: var(--text);
   font-size: 16px;
@@ -537,17 +540,34 @@ button:disabled {
   background: var(--green);
 }
 
+.concurrency-meter[data-state="warning"] .meter-track__fill,
 .window-meter[data-state="warning"] .meter-track__fill {
   background: var(--amber);
 }
 
+.concurrency-meter[data-state="danger"] .meter-track__fill,
+.concurrency-meter[data-state="exhausted"] .meter-track__fill,
 .window-meter[data-state="danger"] .meter-track__fill,
 .window-meter[data-state="exhausted"] .meter-track__fill {
   background: var(--red);
 }
 
+.concurrency-meter[data-state="unknown"] .meter-track__fill,
 .window-meter[data-state="unknown"] .meter-track__fill {
   background: var(--gray);
+}
+
+.concurrency-meter {
+  margin: 0 0 18px;
+}
+
+.concurrency-meter small {
+  display: block;
+  min-width: 0;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 .window-meter__meta {
@@ -588,17 +608,22 @@ button:disabled {
 }
 
 .window-meter__stats {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, max-content));
   justify-content: flex-start;
+  gap: 6px;
   margin-top: 9px;
   color: var(--muted);
   font-size: 12px;
 }
 
 .window-meter__stats span {
+  min-width: 0;
   padding: 3px 8px;
   border-radius: 999px;
   background: var(--surface-muted);
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .account-card__footer {
@@ -771,6 +796,19 @@ button:disabled {
     font-size: 24px;
   }
 
+  .summary-tile--usage {
+    flex-basis: 280px;
+  }
+
+  .summary-usage {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 8px;
+  }
+
+  .summary-usage strong {
+    font-size: 20px;
+  }
+
   .account-card__totals {
     grid-template-columns: 1fr;
   }
@@ -780,6 +818,7 @@ button:disabled {
   }
 
   .account-card__header,
+  .concurrency-meter__top,
   .window-meter__top,
   .window-meter__meta,
   .account-card__footer {
@@ -790,5 +829,15 @@ button:disabled {
 
   .health-pill {
     align-self: flex-start;
+  }
+
+  .window-meter__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .window-meter__stats span:last-child {
+    grid-column: 1 / -1;
+    width: fit-content;
+    max-width: 100%;
   }
 }

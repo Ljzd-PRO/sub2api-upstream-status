@@ -1,11 +1,11 @@
 "use client";
 
-import { AlertTriangle, Ban, CheckCircle2, CircleOff, TimerReset } from "lucide-react";
+import { AlertTriangle, Ban, CheckCircle2, CircleOff, Gauge, TimerReset } from "lucide-react";
 
 import { WindowMeter } from "@/components/WindowMeter";
-import { formatDateTime, platformLabel } from "@/lib/format";
+import { formatDateTime, formatPercent, platformLabel } from "@/lib/format";
 import type { AppLocale, TFunction } from "@/lib/i18n";
-import type { HealthStatus, PanelAccountStatus } from "@/lib/types";
+import type { HealthStatus, PanelAccountStatus, PanelConcurrency } from "@/lib/types";
 
 interface AccountCardProps {
   account: PanelAccountStatus;
@@ -37,6 +37,10 @@ export function AccountCard({ account, locale, timeZone, t }: AccountCardProps) 
         <span>{account.schedulable ? t("account.schedulable") : t("account.notSchedulable")}</span>
       </div>
 
+      {account.concurrency.available ? (
+        <ConcurrencyMeter concurrency={account.concurrency} t={t} />
+      ) : null}
+
       <div className="window-list">
         <WindowMeter window={account.windows.fiveHour} locale={locale} timeZone={timeZone} t={t} />
         <WindowMeter window={account.windows.sevenDay} locale={locale} timeZone={timeZone} t={t} />
@@ -62,6 +66,47 @@ export function AccountCard({ account, locale, timeZone, t }: AccountCardProps) 
       ) : null}
     </article>
   );
+}
+
+function ConcurrencyMeter({ concurrency, t }: { concurrency: PanelConcurrency; t: TFunction }) {
+  const value =
+    concurrency.utilization == null
+      ? concurrency.limit != null
+        ? 100
+        : 0
+      : Math.max(0, Math.min(100, concurrency.utilization));
+
+  return (
+    <section className="concurrency-meter" data-state={concurrency.state}>
+      <div className="concurrency-meter__top">
+        <div className="concurrency-meter__label">
+          <Gauge size={15} aria-hidden />
+          <span>{t("account.concurrencyCapacity")}</span>
+        </div>
+        <strong>{formatConcurrencyText(concurrency, t)}</strong>
+      </div>
+      <div className="meter-track" aria-label={t("account.concurrencyCapacity")}>
+        <div className="meter-track__fill" style={{ width: `${value}%` }} />
+      </div>
+      <small>{t(concurrency.utilization == null ? "account.concurrencyCapacityHelp" : "account.concurrencyUsageHelp")}</small>
+    </section>
+  );
+}
+
+function formatConcurrencyText(concurrency: PanelConcurrency, t: TFunction): string {
+  if (concurrency.used != null && concurrency.limit != null) {
+    return `${concurrency.used} / ${concurrency.limit} · ${formatPercent(concurrency.utilization, t("common.noData"))}`;
+  }
+
+  if (concurrency.limit != null) {
+    return `${concurrency.limit} ${t("account.concurrencySlots")}`;
+  }
+
+  if (concurrency.used != null) {
+    return `${concurrency.used} ${t("account.concurrencyUsed")}`;
+  }
+
+  return t("common.noData");
 }
 
 function healthLabel(health: HealthStatus, t: TFunction): string {

@@ -2,6 +2,7 @@ import type {
   HealthStatus,
   PanelAccountStatus,
   PanelAccountTotals,
+  PanelConcurrency,
   PanelSummary,
   PanelUsageWindow,
   PanelWindowTotals,
@@ -78,6 +79,7 @@ export function normalizeAccount(
     lastUsedAt: account.last_used_at || null,
     updatedAt: usage?.updated_at || account.updated_at || null,
     rateLimitResetAt: account.rate_limit_reset_at || null,
+    concurrency: normalizeConcurrency(account),
     windows: {
       fiveHour,
       sevenDay
@@ -154,6 +156,62 @@ function normalizeTotals(stats: Sub2APIAccountStats | null): PanelAccountTotals 
     cost: numberFromUnknown(stats.cost) ?? 0,
     standardCost: numberFromUnknown(stats.standard_cost) ?? 0,
     userCost: numberFromUnknown(stats.user_cost) ?? 0
+  };
+}
+
+function normalizeConcurrency(account: Sub2APIAccount): PanelConcurrency {
+  const record = account as unknown as Record<string, unknown>;
+  const extra = (account.extra ?? {}) as Record<string, unknown>;
+  const limit = integerFromFirst(
+    account.concurrency,
+    record.concurrency_limit,
+    record.max_concurrency,
+    record.parallel_limit,
+    record.max_parallel_requests,
+    extra.concurrency,
+    extra.concurrency_limit,
+    extra.max_concurrency
+  );
+  const used = integerFromFirst(
+    account.current_concurrency,
+    account.used_concurrency,
+    account.active_concurrency,
+    account.in_flight_requests,
+    account.running_requests,
+    record.current_requests,
+    record.active_requests,
+    record.busy_requests,
+    record.inflight_requests,
+    extra.current_concurrency,
+    extra.used_concurrency,
+    extra.active_concurrency,
+    extra.in_flight_requests,
+    extra.running_requests
+  );
+
+  if (limit == null && used == null) {
+    return {
+      available: false,
+      used: null,
+      limit: null,
+      utilization: null,
+      state: "unknown"
+    };
+  }
+
+  const safeLimit = limit == null ? null : Math.max(0, limit);
+  const safeUsed = used == null ? null : Math.max(0, used);
+  const utilization =
+    safeLimit && safeLimit > 0 && safeUsed != null
+      ? roundOne(Math.min(100, (safeUsed / safeLimit) * 100))
+      : null;
+
+  return {
+    available: true,
+    used: safeUsed,
+    limit: safeLimit,
+    utilization,
+    state: utilization == null ? "unknown" : utilizationState(utilization)
   };
 }
 
@@ -367,6 +425,14 @@ function numberFromUnknown(value: unknown): number | null {
   if (typeof value === "string" && value.trim()) {
     const parsed = Number(value);
     if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+}
+
+function integerFromFirst(...values: unknown[]): number | null {
+  for (const value of values) {
+    const parsed = numberFromUnknown(value);
+    if (parsed != null) return Math.floor(parsed);
   }
   return null;
 }

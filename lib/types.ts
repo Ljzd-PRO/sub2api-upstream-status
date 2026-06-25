@@ -17,6 +17,11 @@ export interface Sub2APIAccount {
   created_at?: string;
   updated_at?: string;
   schedulable?: boolean;
+  current_concurrency?: number;
+  used_concurrency?: number;
+  active_concurrency?: number;
+  in_flight_requests?: number;
+  running_requests?: number;
   rate_limited_at?: string | null;
   rate_limit_reset_at?: string | null;
   overload_until?: string | null;
@@ -94,6 +99,14 @@ export interface PanelWindowTotals {
   userCost: number;
 }
 
+export interface PanelConcurrency {
+  available: boolean;
+  used: number | null;
+  limit: number | null;
+  utilization: number | null;
+  state: WindowState;
+}
+
 export interface PanelUsageWindow {
   key: "5h" | "7d";
   label: string;
@@ -120,6 +133,7 @@ export interface PanelAccountStatus {
   lastUsedAt: string | null;
   updatedAt: string | null;
   rateLimitResetAt: string | null;
+  concurrency: PanelConcurrency;
   windows: {
     fiveHour: PanelUsageWindow;
     sevenDay: PanelUsageWindow;
