@@ -624,10 +624,47 @@ button:disabled {
     width: 100%;
   }
 
-  .summary-grid,
   .toolbar,
   .account-grid {
     grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    display: flex;
+    gap: 10px;
+    margin: 0 -10px 14px;
+    padding: 0 10px 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: 10px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .summary-grid::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .summary-grid::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--border-strong);
+  }
+
+  .summary-tile {
+    min-height: 76px;
+    flex: 0 0 148px;
+    padding: 12px;
+    scroll-snap-align: start;
+  }
+
+  .summary-tile__icon {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .summary-tile strong {
+    font-size: 24px;
   }
 
   .account-card__totals {
