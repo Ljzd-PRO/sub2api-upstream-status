@@ -7,6 +7,7 @@ import {
   normalizeAccount,
   shouldFetchPassiveUsage
 } from "@/lib/normalize";
+import { maskAccountName } from "@/lib/privacy";
 import { Sub2APIClient } from "@/lib/sub2api";
 import type {
   AccountFetchResult,
@@ -27,7 +28,7 @@ export async function GET() {
     const now = new Date();
 
     const results = await Promise.all(
-      config.accountIds.map((id) => fetchAccountStatus(client, id, now))
+      config.accountIds.map((id) => fetchAccountStatus(client, id, now, config.maskAccountNames))
     );
 
     const accounts = results.map((result) => {
@@ -75,7 +76,8 @@ export async function GET() {
 async function fetchAccountStatus(
   client: Sub2APIClient,
   id: number,
-  now: Date
+  now: Date,
+  maskName: boolean
 ): Promise<AccountFetchResult> {
   try {
     const [account, stats] = await Promise.all([
@@ -95,7 +97,7 @@ async function fetchAccountStatus(
 
     return {
       id,
-      account: normalizeAccount(account, usage, usageError, now, stats),
+      account: normalizeAccount(maskName ? maskSub2APIAccountName(account) : account, usage, usageError, now, stats),
       error: null
     };
   } catch (error) {
@@ -105,6 +107,13 @@ async function fetchAccountStatus(
       error: error instanceof Error ? error.message : "account request failed"
     };
   }
+}
+
+function maskSub2APIAccountName<T extends { name: string }>(account: T): T {
+  return {
+    ...account,
+    name: maskAccountName(account.name)
+  };
 }
 
 async function getAccountTotals(client: Sub2APIClient, id: number): Promise<Sub2APIAccountStats | null> {

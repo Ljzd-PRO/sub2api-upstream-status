@@ -9,6 +9,7 @@ export interface ServerConfig {
   apiBaseUrl: string;
   adminApiKey: string;
   accountIds: number[];
+  maskAccountNames: boolean;
   refreshIntervalSeconds: number;
   requestTimeoutMs: number;
   panelTitle: string;
@@ -60,6 +61,11 @@ function parsePositiveInteger(
   return Math.min(max, Math.max(min, Math.floor(parsed)));
 }
 
+export function parseBooleanFlag(value: string | undefined): boolean {
+  const normalized = value?.trim().toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
+}
+
 export function getServerConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const apiBaseUrl = normalizeApiBaseUrl(env.SUB2API_BASE_URL);
   const adminApiKey = env.SUB2API_ADMIN_API_KEY?.trim() ?? "";
@@ -78,6 +84,7 @@ export function getServerConfig(env: NodeJS.ProcessEnv = process.env): ServerCon
     apiBaseUrl,
     adminApiKey,
     accountIds,
+    maskAccountNames: parseBooleanFlag(env.MASK_ACCOUNT_NAMES),
     refreshIntervalSeconds: parsePositiveInteger(
       env.REFRESH_INTERVAL_SECONDS,
       DEFAULT_REFRESH_SECONDS,

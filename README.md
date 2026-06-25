@@ -18,6 +18,7 @@ Create `.env` from `.env.example`.
 - `SUB2API_BASE_URL`: sub2api host, with or without `/api/v1`
 - `SUB2API_ADMIN_API_KEY`: admin API key sent server-side as `x-api-key`
 - `SUB2API_ACCOUNT_IDS`: comma or space separated upstream account IDs to show
+- `MASK_ACCOUNT_NAMES`: set to `true` to mask account names in the public API and UI
 - `REFRESH_INTERVAL_SECONDS`: browser polling interval, default `60`
 - `NEXT_PUBLIC_PANEL_TITLE`: dashboard title
 
