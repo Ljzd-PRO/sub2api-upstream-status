@@ -329,14 +329,14 @@ button:disabled {
 
 .account-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
 }
 
 .account-card {
   min-width: 0;
-  min-height: 330px;
-  padding: 16px;
+  min-height: 360px;
+  padding: 20px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
@@ -357,8 +357,8 @@ button:disabled {
   min-width: 0;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 14px;
+  margin-bottom: 12px;
 }
 
 .account-card__title {
@@ -367,10 +367,10 @@ button:disabled {
 
 .account-card h2 {
   max-width: 100%;
-  margin: 6px 0 2px;
+  margin: 8px 0 3px;
   overflow: hidden;
   color: var(--text);
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1.22;
   font-weight: 740;
   letter-spacing: 0;
@@ -427,7 +427,7 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .account-card__meta span {
@@ -475,7 +475,7 @@ button:disabled {
 
 .window-list {
   display: grid;
-  gap: 12px;
+  gap: 18px;
 }
 
 .window-meter {
@@ -509,8 +509,8 @@ button:disabled {
 
 .meter-track {
   position: relative;
-  height: 9px;
-  margin: 8px 0 7px;
+  height: 10px;
+  margin: 10px 0 9px;
   overflow: hidden;
   border-radius: 999px;
   background: #e5eaf0;
@@ -552,20 +552,20 @@ button:disabled {
 .window-meter__stats {
   flex-wrap: wrap;
   justify-content: flex-start;
-  margin-top: 7px;
+  margin-top: 9px;
   color: var(--muted);
   font-size: 12px;
 }
 
 .window-meter__stats span {
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 999px;
   background: var(--surface-muted);
 }
 
 .account-card__footer {
-  margin-top: 14px;
-  padding-top: 12px;
+  margin-top: 18px;
+  padding-top: 14px;
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: 12px;
@@ -650,6 +650,10 @@ button:disabled {
 
 @media (max-width: 900px) {
   .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .account-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
