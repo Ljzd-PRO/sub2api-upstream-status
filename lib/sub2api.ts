@@ -1,5 +1,10 @@
 import type { ServerConfig } from "@/lib/env";
-import type { Sub2APIAccount, Sub2APIBatchTodayStats, Sub2APIUsageInfo } from "@/lib/types";
+import type {
+  Sub2APIAccount,
+  Sub2APIAccountUsageStats,
+  Sub2APIBatchTodayStats,
+  Sub2APIUsageInfo
+} from "@/lib/types";
 
 interface Sub2APIEnvelope<T> {
   code: number | string;
@@ -33,6 +38,10 @@ export class Sub2APIClient {
 
   getAccount(id: number): Promise<Sub2APIAccount> {
     return this.request<Sub2APIAccount>(`/admin/accounts/${id}`);
+  }
+
+  getAccountStats(id: number): Promise<Sub2APIAccountUsageStats> {
+    return this.request<Sub2APIAccountUsageStats>(`/admin/accounts/${id}/stats`);
   }
 
   getPassiveUsage(id: number): Promise<Sub2APIUsageInfo> {

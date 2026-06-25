@@ -59,6 +59,18 @@ export interface Sub2APIAccountStats {
   user_cost?: number;
 }
 
+export interface Sub2APIAccountStatsSummary {
+  total_cost?: number;
+  total_user_cost?: number;
+  total_standard_cost?: number;
+  total_requests?: number;
+  total_tokens?: number;
+}
+
+export interface Sub2APIAccountUsageStats {
+  summary?: Sub2APIAccountStatsSummary | null;
+}
+
 export interface Sub2APIBatchTodayStats {
   stats?: Record<string, Sub2APIAccountStats>;
 }

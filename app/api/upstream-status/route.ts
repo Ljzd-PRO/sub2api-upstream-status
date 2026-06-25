@@ -8,7 +8,13 @@ import {
   shouldFetchPassiveUsage
 } from "@/lib/normalize";
 import { Sub2APIClient } from "@/lib/sub2api";
-import type { AccountFetchResult, PanelPayload, Sub2APIUsageInfo } from "@/lib/types";
+import type {
+  AccountFetchResult,
+  PanelPayload,
+  Sub2APIAccountStats,
+  Sub2APIAccountUsageStats,
+  Sub2APIUsageInfo
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,10 +25,9 @@ export async function GET() {
     const config = getServerConfig();
     const client = new Sub2APIClient(config);
     const now = new Date();
-    const todayStats = await getTodayStatsByAccount(client, config.accountIds);
 
     const results = await Promise.all(
-      config.accountIds.map((id) => fetchAccountStatus(client, id, now, todayStats[id] ?? null))
+      config.accountIds.map((id) => fetchAccountStatus(client, id, now))
     );
 
     const accounts = results.map((result) => {
@@ -39,8 +44,7 @@ export async function GET() {
           },
           null,
           result.error,
-          now,
-          todayStats[result.id] ?? null
+          now
         );
     });
 
@@ -71,11 +75,13 @@ export async function GET() {
 async function fetchAccountStatus(
   client: Sub2APIClient,
   id: number,
-  now: Date,
-  todayStats: NonNullable<Awaited<ReturnType<typeof getTodayStatsByAccount>>[number]> | null
+  now: Date
 ): Promise<AccountFetchResult> {
   try {
-    const account = await client.getAccount(id);
+    const [account, stats] = await Promise.all([
+      client.getAccount(id),
+      getAccountTotals(client, id)
+    ]);
     let usage: Sub2APIUsageInfo | null = buildOpenAIUsageFromExtra(account, now);
     let usageError: string | null = null;
 
@@ -89,7 +95,7 @@ async function fetchAccountStatus(
 
     return {
       id,
-      account: normalizeAccount(account, usage, usageError, now, todayStats),
+      account: normalizeAccount(account, usage, usageError, now, stats),
       error: null
     };
   } catch (error) {
@@ -101,11 +107,23 @@ async function fetchAccountStatus(
   }
 }
 
-async function getTodayStatsByAccount(client: Sub2APIClient, ids: number[]) {
+async function getAccountTotals(client: Sub2APIClient, id: number): Promise<Sub2APIAccountStats | null> {
   try {
-    const payload = await client.getBatchTodayStats(ids);
-    return payload.stats ?? {};
+    return totalsFromAccountStats(await client.getAccountStats(id));
   } catch {
-    return {};
+    return null;
   }
+}
+
+function totalsFromAccountStats(payload: Sub2APIAccountUsageStats): Sub2APIAccountStats | null {
+  const summary = payload.summary;
+  if (!summary) return null;
+
+  return {
+    requests: summary.total_requests,
+    tokens: summary.total_tokens,
+    cost: summary.total_cost,
+    standard_cost: summary.total_standard_cost,
+    user_cost: summary.total_user_cost
+  };
 }
