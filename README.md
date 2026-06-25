@@ -1,15 +1,18 @@
 # sub2api upstream status
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 Public read-only Next.js panel for selected sub2api upstream account usage windows.
 
 ## Features
 
 - Read-only public dashboard for selected upstream accounts
 - 5h and 7d usage windows with reset time and countdown
-- Per-account daily calls and token totals
+- 5h and 7d request counts and token usage, both per account and in dashboard summary
 - Frontend auto refresh countdown with a per-browser pause switch
 - Automatic language detection with Simplified Chinese, English, and Traditional Chinese
 - Automatic time zone detection with a per-browser manual time zone selector
+- Optional account name masking in the public API and UI
 
 ## Configuration
 
