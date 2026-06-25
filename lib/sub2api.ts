@@ -48,6 +48,10 @@ export class Sub2APIClient {
     return this.request<Sub2APIUsageInfo>(`/admin/accounts/${id}/usage?source=passive`);
   }
 
+  getActiveUsage(id: number): Promise<Sub2APIUsageInfo> {
+    return this.request<Sub2APIUsageInfo>(`/admin/accounts/${id}/usage?source=active`);
+  }
+
   getBatchTodayStats(ids: number[]): Promise<Sub2APIBatchTodayStats> {
     return this.request<Sub2APIBatchTodayStats>("/admin/accounts/today-stats/batch", {
       method: "POST",

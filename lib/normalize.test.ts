@@ -5,6 +5,7 @@ import {
   buildOpenAIUsageFromExtra,
   buildSummary,
   normalizeAccount,
+  shouldFetchActiveUsage,
   shouldFetchPassiveUsage
 } from "@/lib/normalize";
 import type { Sub2APIAccount } from "@/lib/types";
@@ -37,8 +38,12 @@ describe("buildOpenAIUsageFromExtra", () => {
         extra: {
           codex_5h_used_percent: 12.5,
           codex_5h_reset_at: "2026-03-16T14:00:00Z",
+          codex_5h_requests: 158,
+          codex_5h_tokens: 7900000,
           codex_7d_used_percent: "34",
           codex_7d_reset_after_seconds: 86400,
+          codex_7d_requests: "420",
+          codex_7d_total_tokens: "12500000",
           codex_usage_updated_at: "2026-03-16T11:00:00Z"
         }
       }),
@@ -47,8 +52,10 @@ describe("buildOpenAIUsageFromExtra", () => {
 
     expect(usage?.five_hour?.utilization).toBe(12.5);
     expect(usage?.five_hour?.resets_at).toBe("2026-03-16T14:00:00.000Z");
+    expect(usage?.five_hour?.window_stats).toMatchObject({ requests: 158, tokens: 7900000 });
     expect(usage?.seven_day?.utilization).toBe(34);
     expect(usage?.seven_day?.resets_at).toBe("2026-03-17T11:00:00.000Z");
+    expect(usage?.seven_day?.window_stats).toMatchObject({ requests: 420, tokens: 12500000 });
   });
 
   it("zeros an expired Codex window", () => {
@@ -99,6 +106,12 @@ describe("normalizeAccount", () => {
     expect(shouldFetchPassiveUsage(baseAccount({ platform: "openai", type: "oauth" }))).toBe(false);
   });
 
+  it("uses active usage for OpenAI OAuth accounts", () => {
+    expect(shouldFetchActiveUsage(baseAccount({ platform: "openai", type: "oauth" }))).toBe(true);
+    expect(shouldFetchActiveUsage(baseAccount({ platform: "openai", type: "apikey" }))).toBe(false);
+    expect(shouldFetchActiveUsage(baseAccount({ platform: "anthropic", type: "oauth" }))).toBe(false);
+  });
+
   it("normalizes today request and token totals", () => {
     const status = normalizeAccount(
       baseAccount(),
@@ -125,6 +138,56 @@ describe("normalizeAccount", () => {
     expect(buildSummary([first, second])).toMatchObject({
       requests: 5,
       tokens: 350
+    });
+  });
+
+  it("aggregates 5h and 7d window totals separately in the summary", () => {
+    const firstUsage = {
+      source: "active" as const,
+      updated_at: "2026-03-16T11:58:00Z",
+      five_hour: {
+        utilization: 11,
+        resets_at: "2026-03-16T14:00:00Z",
+        remaining_seconds: 7200,
+        window_stats: { requests: 158, tokens: 7900000 }
+      },
+      seven_day: {
+        utilization: 22,
+        resets_at: "2026-03-20T14:00:00Z",
+        remaining_seconds: 360000,
+        window_stats: { requests: 410, tokens: 12000000 }
+      }
+    };
+    const secondUsage = {
+      source: "active" as const,
+      updated_at: "2026-03-16T11:58:00Z",
+      five_hour: {
+        utilization: 5,
+        resets_at: "2026-03-16T14:00:00Z",
+        remaining_seconds: 7200,
+        window_stats: { requests: 2, total_tokens: 1000 }
+      },
+      seven_day: {
+        utilization: 8,
+        resets_at: "2026-03-20T14:00:00Z",
+        remaining_seconds: 360000,
+        window_stats: { requests: 4, tokens: 2000 }
+      }
+    };
+    const first = normalizeAccount(baseAccount({ id: 1 }), firstUsage, null, now);
+    const second = normalizeAccount(baseAccount({ id: 2 }), secondUsage, null, now);
+
+    expect(buildSummary([first, second])).toMatchObject({
+      fiveHour: {
+        availableAccounts: 2,
+        requests: 160,
+        tokens: 7901000
+      },
+      sevenDay: {
+        availableAccounts: 2,
+        requests: 414,
+        tokens: 12002000
+      }
     });
   });
 });

@@ -37,15 +37,21 @@ export function AccountCard({ account, locale, timeZone, t }: AccountCardProps) 
         <span>{account.schedulable ? t("account.schedulable") : t("account.notSchedulable")}</span>
       </div>
 
-      <div className="account-card__totals" aria-label={t("account.todayUsageTotals")}>
-        <div>
-          <span>{t("account.callsToday")}</span>
-          <strong>{account.today.available ? formatCompactNumber(account.today.requests, locale) : t("common.noData")}</strong>
-        </div>
-        <div>
-          <span>{t("account.tokensToday")}</span>
-          <strong>{account.today.available ? formatCompactNumber(account.today.tokens, locale) : t("common.noData")}</strong>
-        </div>
+      <div className="account-card__window-totals" aria-label={t("account.windowUsageTotals")}>
+        <WindowUsageTotals
+          label={t("window.5h")}
+          requests={account.windows.fiveHour.stats?.requests}
+          tokens={account.windows.fiveHour.stats?.tokens}
+          locale={locale}
+          t={t}
+        />
+        <WindowUsageTotals
+          label={t("window.7d")}
+          requests={account.windows.sevenDay.stats?.requests}
+          tokens={account.windows.sevenDay.stats?.tokens}
+          locale={locale}
+          t={t}
+        />
       </div>
 
       <div className="window-list">
@@ -72,6 +78,36 @@ export function AccountCard({ account, locale, timeZone, t }: AccountCardProps) 
         </div>
       ) : null}
     </article>
+  );
+}
+
+function WindowUsageTotals({
+  label,
+  requests,
+  tokens,
+  locale,
+  t
+}: {
+  label: string;
+  requests: number | undefined;
+  tokens: number | undefined;
+  locale: AppLocale;
+  t: TFunction;
+}) {
+  const available = requests !== undefined || tokens !== undefined;
+
+  return (
+    <div className="window-total">
+      <span className="window-total__label">{label}</span>
+      <div className="window-total__values">
+        <span>{t("account.windowRequests")}</span>
+        <strong>{available ? formatCompactNumber(requests ?? 0, locale) : t("common.noData")}</strong>
+      </div>
+      <div className="window-total__values">
+        <span>{t("account.windowTokens")}</span>
+        <strong>{available ? formatCompactNumber(tokens ?? 0, locale) : t("common.noData")}</strong>
+      </div>
+    </div>
   );
 }
 

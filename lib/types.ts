@@ -27,6 +27,7 @@ export interface Sub2APIAccount {
 export interface Sub2APIWindowStats {
   requests?: number;
   tokens?: number;
+  total_tokens?: number;
   cost?: number;
   standard_cost?: number;
   user_cost?: number;
@@ -84,6 +85,15 @@ export interface PanelAccountTotals {
   userCost: number;
 }
 
+export interface PanelWindowTotals {
+  availableAccounts: number;
+  requests: number;
+  tokens: number;
+  cost: number;
+  standardCost: number;
+  userCost: number;
+}
+
 export interface PanelUsageWindow {
   key: "5h" | "7d";
   label: string;
@@ -127,6 +137,8 @@ export interface PanelSummary {
   partialErrors: number;
   requests: number;
   tokens: number;
+  fiveHour: PanelWindowTotals;
+  sevenDay: PanelWindowTotals;
 }
 
 export interface PanelPayload {

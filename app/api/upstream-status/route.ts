@@ -5,6 +5,7 @@ import {
   buildOpenAIUsageFromExtra,
   buildSummary,
   normalizeAccount,
+  shouldFetchActiveUsage,
   shouldFetchPassiveUsage
 } from "@/lib/normalize";
 import { maskAccountName } from "@/lib/privacy";
@@ -84,10 +85,19 @@ async function fetchAccountStatus(
       client.getAccount(id),
       getAccountTotals(client, id)
     ]);
-    let usage: Sub2APIUsageInfo | null = buildOpenAIUsageFromExtra(account, now);
+    const fallbackUsage = buildOpenAIUsageFromExtra(account, now);
+    let usage: Sub2APIUsageInfo | null = fallbackUsage;
     let usageError: string | null = null;
 
-    if (!usage && shouldFetchPassiveUsage(account)) {
+    if (shouldFetchActiveUsage(account)) {
+      try {
+        const activeUsage = await client.getActiveUsage(id);
+        usage = { ...activeUsage, source: activeUsage.source ?? "active" };
+      } catch (error) {
+        usage = fallbackUsage;
+        usageError = error instanceof Error ? error.message : "usage request failed";
+      }
+    } else if (!usage && shouldFetchPassiveUsage(account)) {
       try {
         usage = await client.getPassiveUsage(id);
       } catch (error) {

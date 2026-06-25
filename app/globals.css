@@ -129,7 +129,7 @@ button:disabled {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 14px;
 }
@@ -382,14 +382,16 @@ button:disabled {
   font-size: 12px;
 }
 
-.account-card__totals {
+.account-card__totals,
+.account-card__window-totals {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
 
-.account-card__totals div {
+.account-card__totals div,
+.window-total {
   min-width: 0;
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -397,13 +399,15 @@ button:disabled {
   background: var(--surface-muted);
 }
 
-.account-card__totals span {
+.account-card__totals span,
+.window-total span {
   display: block;
   color: var(--muted);
   font-size: 12px;
 }
 
-.account-card__totals strong {
+.account-card__totals strong,
+.window-total strong {
   display: block;
   min-width: 0;
   margin-top: 3px;
@@ -413,6 +417,35 @@ button:disabled {
   line-height: 1.1;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.window-total__label {
+  margin-bottom: 8px;
+  color: var(--muted-strong) !important;
+  font-size: 13px !important;
+  font-weight: 760;
+}
+
+.window-total__values {
+  display: grid;
+  grid-template-columns: minmax(52px, 0.65fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+}
+
+.window-total__values + .window-total__values {
+  margin-top: 6px;
+}
+
+.window-total__values span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.window-total__values strong {
+  margin-top: 0;
+  text-align: right;
 }
 
 .window-list {
@@ -591,7 +624,7 @@ button:disabled {
 
 @media (max-width: 900px) {
   .summary-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .toolbar {
@@ -667,7 +700,8 @@ button:disabled {
     font-size: 24px;
   }
 
-  .account-card__totals {
+  .account-card__totals,
+  .account-card__window-totals {
     grid-template-columns: 1fr;
   }
 

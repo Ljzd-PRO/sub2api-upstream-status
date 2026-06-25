@@ -4,8 +4,10 @@ import type {
   PanelAccountTotals,
   PanelSummary,
   PanelUsageWindow,
+  PanelWindowTotals,
   Sub2APIAccount,
   Sub2APIAccountStats,
+  Sub2APIWindowStats,
   Sub2APIUsageInfo,
   Sub2APIUsageProgress,
   UsageSource,
@@ -19,6 +21,10 @@ export function shouldFetchPassiveUsage(account: Sub2APIAccount): boolean {
   const platform = account.platform.toLowerCase();
   const type = account.type.toLowerCase();
   return platform === "anthropic" && (type === "oauth" || type === "setup-token");
+}
+
+export function shouldFetchActiveUsage(account: Sub2APIAccount): boolean {
+  return account.platform.toLowerCase() === "openai" && account.type.toLowerCase() === "oauth";
 }
 
 export function buildOpenAIUsageFromExtra(
@@ -51,7 +57,9 @@ export function normalizeAccount(
   todayStats: Sub2APIAccountStats | null = null
 ): PanelAccountStatus {
   const source: UsageSource =
-    account.platform.toLowerCase() === "openai" && usage ? "account-extra" : usage?.source ?? "none";
+    account.platform.toLowerCase() === "openai" && usage && usage.source !== "active"
+      ? "account-extra"
+      : usage?.source ?? "none";
 
   const fiveHour = normalizeWindow("5h", "5h window", usage?.five_hour ?? null, source, now);
   const sevenDay = normalizeWindow("7d", "7d window", usage?.seven_day ?? null, source, now);
@@ -80,6 +88,9 @@ export function normalizeAccount(
 }
 
 export function buildSummary(accounts: PanelAccountStatus[]): PanelSummary {
+  const fiveHour = summarizeWindow(accounts, "fiveHour");
+  const sevenDay = summarizeWindow(accounts, "sevenDay");
+
   return {
     total: accounts.length,
     active: accounts.filter((account) => account.status === "active").length,
@@ -89,8 +100,39 @@ export function buildSummary(accounts: PanelAccountStatus[]): PanelSummary {
     unavailable: accounts.filter((account) => account.health === "unavailable").length,
     partialErrors: accounts.filter((account) => account.usageError).length,
     requests: accounts.reduce((sum, account) => sum + account.today.requests, 0),
-    tokens: accounts.reduce((sum, account) => sum + account.today.tokens, 0)
+    tokens: accounts.reduce((sum, account) => sum + account.today.tokens, 0),
+    fiveHour,
+    sevenDay
   };
+}
+
+function summarizeWindow(
+  accounts: PanelAccountStatus[],
+  key: "fiveHour" | "sevenDay"
+): PanelWindowTotals {
+  return accounts.reduce<PanelWindowTotals>(
+    (totals, account) => {
+      const stats = account.windows[key].stats;
+      if (!stats) return totals;
+
+      return {
+        availableAccounts: totals.availableAccounts + 1,
+        requests: totals.requests + Math.max(0, Math.floor(numberFromUnknown(stats.requests) ?? 0)),
+        tokens: totals.tokens + Math.max(0, Math.floor(numberFromUnknown(stats.tokens ?? stats.total_tokens) ?? 0)),
+        cost: totals.cost + (numberFromUnknown(stats.cost) ?? 0),
+        standardCost: totals.standardCost + (numberFromUnknown(stats.standard_cost) ?? 0),
+        userCost: totals.userCost + (numberFromUnknown(stats.user_cost) ?? 0)
+      };
+    },
+    {
+      availableAccounts: 0,
+      requests: 0,
+      tokens: 0,
+      cost: 0,
+      standardCost: 0,
+      userCost: 0
+    }
+  );
 }
 
 function normalizeTotals(stats: Sub2APIAccountStats | null): PanelAccountTotals {
@@ -122,7 +164,10 @@ function normalizeWindow(
   source: UsageSource,
   now: Date
 ): PanelUsageWindow {
-  if (!progress || progress.utilization == null || !Number.isFinite(Number(progress.utilization))) {
+  const stats = normalizeWindowStats(progress?.window_stats ?? null);
+  const hasUtilization = progress?.utilization != null && Number.isFinite(Number(progress.utilization));
+
+  if (!progress || (!hasUtilization && !stats)) {
     return {
       key,
       label,
@@ -132,25 +177,37 @@ function normalizeWindow(
       resetsAt: null,
       remainingSeconds: null,
       source: "none",
-      stats: null
+      stats
     };
   }
 
   const resetAt = parseDateLike(progress.resets_at);
   const remainingSeconds = computeRemainingSeconds(progress.remaining_seconds, resetAt, now);
   const expired = resetAt ? resetAt.getTime() <= now.getTime() : false;
-  const utilization = expired ? 0 : roundOne(Math.max(0, Number(progress.utilization)));
+  const utilization = hasUtilization ? (expired ? 0 : roundOne(Math.max(0, Number(progress.utilization)))) : null;
 
   return {
     key,
     label,
     available: true,
     utilization,
-    state: utilizationState(utilization),
+    state: utilization == null ? "unknown" : utilizationState(utilization),
     resetsAt: resetAt?.toISOString() ?? null,
     remainingSeconds: expired ? 0 : remainingSeconds,
     source,
-    stats: progress.window_stats ?? null
+    stats
+  };
+}
+
+function normalizeWindowStats(stats: Sub2APIWindowStats | null): Sub2APIWindowStats | null {
+  if (!stats) return null;
+
+  return {
+    requests: Math.max(0, Math.floor(numberFromUnknown(stats.requests) ?? 0)),
+    tokens: Math.max(0, Math.floor(numberFromUnknown(stats.tokens ?? stats.total_tokens) ?? 0)),
+    cost: numberFromUnknown(stats.cost) ?? 0,
+    standard_cost: numberFromUnknown(stats.standard_cost) ?? 0,
+    user_cost: numberFromUnknown(stats.user_cost) ?? 0
   };
 }
 
@@ -219,7 +276,49 @@ function buildCodexProgress(
   return {
     utilization: expired ? 0 : used,
     resets_at: resetAt?.toISOString() ?? null,
-    remaining_seconds: resetAt ? Math.max(0, Math.floor((resetAt.getTime() - now.getTime()) / 1000)) : 0
+    remaining_seconds: resetAt ? Math.max(0, Math.floor((resetAt.getTime() - now.getTime()) / 1000)) : 0,
+    window_stats: buildCodexWindowStatsFromExtra(extra, prefix)
+  };
+}
+
+function buildCodexWindowStatsFromExtra(
+  extra: Record<string, unknown>,
+  prefix: "codex_5h" | "codex_7d"
+): Sub2APIWindowStats | null {
+  const requests =
+    numberFromUnknown(extra[`${prefix}_requests`]) ??
+    numberFromUnknown(extra[`${prefix}_used_requests`]) ??
+    numberFromUnknown(extra[`${prefix}_window_requests`]);
+  const tokens =
+    numberFromUnknown(extra[`${prefix}_tokens`]) ??
+    numberFromUnknown(extra[`${prefix}_total_tokens`]) ??
+    numberFromUnknown(extra[`${prefix}_window_tokens`]);
+  const cost =
+    numberFromUnknown(extra[`${prefix}_cost`]) ??
+    numberFromUnknown(extra[`${prefix}_window_cost`]);
+  const standardCost =
+    numberFromUnknown(extra[`${prefix}_standard_cost`]) ??
+    numberFromUnknown(extra[`${prefix}_window_standard_cost`]);
+  const userCost =
+    numberFromUnknown(extra[`${prefix}_user_cost`]) ??
+    numberFromUnknown(extra[`${prefix}_window_user_cost`]);
+
+  if (
+    requests == null &&
+    tokens == null &&
+    cost == null &&
+    standardCost == null &&
+    userCost == null
+  ) {
+    return null;
+  }
+
+  return {
+    requests: Math.max(0, Math.floor(requests ?? 0)),
+    tokens: Math.max(0, Math.floor(tokens ?? 0)),
+    cost: cost ?? 0,
+    standard_cost: standardCost ?? 0,
+    user_cost: userCost ?? 0
   };
 }
 

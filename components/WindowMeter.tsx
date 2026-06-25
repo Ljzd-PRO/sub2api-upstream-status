@@ -15,7 +15,7 @@ interface WindowMeterProps {
 
 export function WindowMeter({ window, locale, timeZone, t }: WindowMeterProps) {
   const value = Math.max(0, Math.min(100, window.utilization ?? 0));
-  const hasStats = window.stats && (window.stats.requests || window.stats.tokens || window.stats.cost);
+  const hasStats = window.stats !== null;
   const label = window.key === "5h" ? t("window.5h") : t("window.7d");
 
   return (
@@ -39,8 +39,8 @@ export function WindowMeter({ window, locale, timeZone, t }: WindowMeterProps) {
 
       {hasStats ? (
         <div className="window-meter__stats">
-          <span>{formatCompactNumber(window.stats?.requests, locale)} {t("unit.requestShort")}</span>
-          <span>{formatCompactNumber(window.stats?.tokens, locale)} {t("unit.tokenShort")}</span>
+          <span>{t("account.windowRequests")} {formatCompactNumber(window.stats?.requests, locale)}</span>
+          <span>{t("account.windowTokens")} {formatCompactNumber(window.stats?.tokens, locale)}</span>
           <span>{formatMoney(window.stats?.cost)}</span>
         </div>
       ) : null}

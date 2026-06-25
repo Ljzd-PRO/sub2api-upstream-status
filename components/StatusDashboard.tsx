@@ -3,6 +3,8 @@
 import {
   Activity,
   AlertTriangle,
+  CalendarDays,
+  Clock3,
   Database,
   Eye,
   Hash,
@@ -227,8 +229,10 @@ export function StatusDashboard() {
       <section className="summary-grid" aria-label={t("common.accounts")}>
         <SummaryTile label={t("summary.accounts")} value={data?.summary.total ?? 0} icon={<Activity size={18} />} />
         <SummaryTile label={t("summary.schedulable")} value={data?.summary.schedulable ?? 0} icon={<ShieldCheck size={18} />} />
-        <SummaryTile label={t("summary.calls")} value={formatCompactNumber(data?.summary.requests ?? 0, locale)} icon={<Hash size={18} />} />
-        <SummaryTile label={t("summary.tokens")} value={formatCompactNumber(data?.summary.tokens ?? 0, locale)} icon={<Database size={18} />} />
+        <SummaryTile label={t("summary.calls5h")} value={formatCompactNumber(data?.summary.fiveHour.requests ?? 0, locale)} icon={<Clock3 size={18} />} />
+        <SummaryTile label={t("summary.tokens5h")} value={formatCompactNumber(data?.summary.fiveHour.tokens ?? 0, locale)} icon={<Database size={18} />} />
+        <SummaryTile label={t("summary.calls7d")} value={formatCompactNumber(data?.summary.sevenDay.requests ?? 0, locale)} icon={<CalendarDays size={18} />} />
+        <SummaryTile label={t("summary.tokens7d")} value={formatCompactNumber(data?.summary.sevenDay.tokens ?? 0, locale)} icon={<Hash size={18} />} />
         <SummaryTile label={t("summary.warning")} value={data?.summary.warning ?? 0} icon={<AlertTriangle size={18} />} />
         <SummaryTile label={t("summary.unavailable")} value={data?.summary.unavailable ?? 0} icon={<SlidersHorizontal size={18} />} />
       </section>
