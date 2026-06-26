@@ -4,6 +4,10 @@
 
 面向指定 sub2api 上游账号的公开只读 Next.js 面板，用于查看额度窗口和窗口内使用量。
 
+## 展示图
+
+![sub2api 上游状态面板展示图](docs/images/dashboard-preview.png)
+
 ## 功能
 
 - 公开只读面板，无需登录即可查看选定上游账号状态

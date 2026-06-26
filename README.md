@@ -4,6 +4,10 @@
 
 Public read-only Next.js panel for selected sub2api upstream account usage windows.
 
+## Preview
+
+![sub2api upstream status dashboard preview](docs/images/dashboard-preview.png)
+
 ## Features
 
 - Read-only public dashboard for selected upstream accounts
