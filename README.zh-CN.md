@@ -21,7 +21,7 @@
 
 ## Scriptable 小组件
 
-iOS Scriptable 小组件脚本位于 [`scriptable/sub2api-upstream-status-widget.js`](scriptable/sub2api-upstream-status-widget.js)，支持主屏幕和锁屏各尺寸。需要复用到其他部署地址时，可在小组件参数中填写对应面板 URL。
+iOS Scriptable 小组件脚本位于 [`scriptable/sub2api-upstream-status-widget.js`](scriptable/sub2api-upstream-status-widget.js)，支持主屏幕和锁屏各尺寸。必须在 Scriptable 小组件配置的“参数”中填写面板基础 URL；脚本内不内置站点地址。
 
 ## 配置
 

@@ -1,13 +1,12 @@
 // Scriptable widget for sub2api-upstream-status.
-// Optional widget parameter: a deployment URL, for example 
+// Required widget parameter: the panel base URL.
 
-const DEFAULT_BASE_URL = "";
 const REFRESH_MINUTES = 5;
 
 const WIDGET_FAMILY = config.widgetFamily || "medium";
-const BASE_URL = normalizeBaseUrl(args.widgetParameter || DEFAULT_BASE_URL);
-const STATUS_API_URL = `${BASE_URL}/api/upstream-status`;
-const LIVE_API_URL = `${BASE_URL}/api/upstream-status/live`;
+const BASE_URL = normalizeBaseUrl(args.widgetParameter);
+const STATUS_API_URL = BASE_URL ? `${BASE_URL}/api/upstream-status` : "";
+const LIVE_API_URL = BASE_URL ? `${BASE_URL}/api/upstream-status/live` : "";
 
 const palette = {
   bgTop: new Color("#111827"),
@@ -25,7 +24,7 @@ const palette = {
   track: new Color("#ffffff", 0.16)
 };
 
-const data = await loadPanelData();
+const data = BASE_URL ? await loadPanelData() : missingParameterData();
 const widget = await createWidget(data);
 Script.setWidget(widget);
 
@@ -49,6 +48,14 @@ async function loadPanelData() {
   }
 }
 
+function missingParameterData() {
+  return {
+    ok: false,
+    error: "Set the widget parameter to your panel URL.",
+    generatedAt: new Date().toISOString()
+  };
+}
+
 async function createWidget(data) {
   if (WIDGET_FAMILY === "accessoryInline") return createAccessoryInline(data);
   if (WIDGET_FAMILY === "accessoryCircular") return createAccessoryCircular(data);
@@ -61,7 +68,7 @@ async function createWidget(data) {
 
 function createBaseWidget(padding = 14) {
   const widget = new ListWidget();
-  widget.url = BASE_URL;
+  if (BASE_URL) widget.url = BASE_URL;
   widget.refreshAfterDate = new Date(Date.now() + REFRESH_MINUTES * 60 * 1000);
   widget.setPadding(padding, padding, padding, padding);
 
@@ -74,7 +81,7 @@ function createBaseWidget(padding = 14) {
 
 function createAccessoryBase() {
   const widget = new ListWidget();
-  widget.url = BASE_URL;
+  if (BASE_URL) widget.url = BASE_URL;
   widget.refreshAfterDate = new Date(Date.now() + REFRESH_MINUTES * 60 * 1000);
   widget.addAccessoryWidgetBackground = true;
   return widget;
@@ -586,7 +593,9 @@ function numberOrZero(value) {
 }
 
 function normalizeBaseUrl(value) {
-  return String(value || DEFAULT_BASE_URL).trim().replace(/\/+$/, "");
+  const trimmed = String(value || "").trim().replace(/\/+$/, "");
+  if (!trimmed) return "";
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
 async function presentPreview(widget, family) {
