@@ -19,6 +19,10 @@ Public read-only Next.js panel for selected sub2api upstream account usage windo
 - Automatic time zone detection with a per-browser manual time zone selector
 - Optional account name masking in the public API and UI
 
+## Scriptable Widget
+
+An iOS Scriptable widget is available at [`scriptable/sub2api-upstream-status-widget.js`](scriptable/sub2api-upstream-status-widget.js). It supports Home Screen and Lock Screen widget sizes. Set the widget parameter to another deployment URL if you want to reuse it with a different panel.
+
 ## Configuration
 
 Create `.env` from `.env.example`.

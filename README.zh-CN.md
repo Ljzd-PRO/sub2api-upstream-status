@@ -19,6 +19,10 @@
 - 自动检测用户时区，并支持按浏览器手动切换时区
 - 支持通过环境变量对公开面板中的账号名做模糊处理
 
+## Scriptable 小组件
+
+iOS Scriptable 小组件脚本位于 [`scriptable/sub2api-upstream-status-widget.js`](scriptable/sub2api-upstream-status-widget.js)，支持主屏幕和锁屏各尺寸。需要复用到其他部署地址时，可在小组件参数中填写对应面板 URL。
+
 ## 配置
 
 基于 `.env.example` 创建 `.env`。
