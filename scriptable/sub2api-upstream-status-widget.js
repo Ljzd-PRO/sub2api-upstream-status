@@ -393,21 +393,28 @@ function makeProgressImage(width, height, currentPercent, recommendedPercent, st
 
   const radius = Math.floor(height / 2);
   ctx.setFillColor(palette.track);
-  ctx.fillRoundedRect(new Rect(0, 0, width, height), radius, radius);
+  fillRoundedRect(ctx, new Rect(0, 0, width, height), radius);
 
   if (Number.isFinite(recommendedPercent)) {
     const recommendedWidth = Math.max(0, Math.min(width, width * recommendedPercent / 100));
     ctx.setFillColor(palette.greenSoft);
-    ctx.fillRoundedRect(new Rect(0, 0, recommendedWidth, height), radius, radius);
+    fillRoundedRect(ctx, new Rect(0, 0, recommendedWidth, height), radius);
   }
 
   if (Number.isFinite(currentPercent)) {
     const fillWidth = Math.max(0, Math.min(width, width * currentPercent / 100));
     ctx.setFillColor(stateColor(state));
-    ctx.fillRoundedRect(new Rect(0, 0, fillWidth, height), radius, radius);
+    fillRoundedRect(ctx, new Rect(0, 0, fillWidth, height), radius);
   }
 
   return ctx.getImage();
+}
+
+function fillRoundedRect(ctx, rect, radius) {
+  const path = new Path();
+  path.addRoundedRect(rect, radius, radius);
+  ctx.addPath(path);
+  ctx.fillPath();
 }
 
 function addText(parent, value, size, weight, color, lineLimit) {
