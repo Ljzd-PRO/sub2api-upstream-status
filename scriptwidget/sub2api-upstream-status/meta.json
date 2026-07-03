@@ -1,0 +1,7 @@
+{
+  "description": "Public sub2api upstream account status widget.",
+  "category": "monitoring",
+  "tags": ["sub2api", "usage", "network", "status"],
+  "difficulty": "medium",
+  "icon": "waveform.path.ecg"
+}

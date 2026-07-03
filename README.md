@@ -23,6 +23,10 @@ Public read-only Next.js panel for selected sub2api upstream account usage windo
 
 An iOS Scriptable widget is available at [`scriptable/sub2api-upstream-status-widget.js`](scriptable/sub2api-upstream-status-widget.js). It supports Home Screen and Lock Screen widget sizes. Set the Scriptable widget Parameter to your panel base URL; the script does not include a built-in URL.
 
+## ScriptWidget Widget
+
+A ScriptWidget package is available at [`scriptwidget/sub2api-upstream-status`](scriptwidget/sub2api-upstream-status). Import the package into ScriptWidget and set `widget-param` to your panel base URL. The package does not include a built-in URL.
+
 ## Configuration
 
 Create `.env` from `.env.example`.
