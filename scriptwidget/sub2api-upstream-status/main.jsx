@@ -103,7 +103,7 @@ const AccessoryWidget = ({ model }) => {
   return (
     <vstack frame="max" background={COLORS.bg} padding="6" linkurl={model.baseUrl}>
       <text font="caption2" color={healthColor(account)}>{healthText(account)}</text>
-      <text font="caption2" color={COLORS.text}>5h {windowPercent(account, "fiveHour")} / 7d {windowPercent(account, "sevenDay")}</text>
+      <text font="caption2" color={COLORS.text}>5 hours {windowPercent(account, "fiveHour")} / 7 days {windowPercent(account, "sevenDay")}</text>
     </vstack>
   );
 };
@@ -115,8 +115,8 @@ const SmallWidget = ({ model }) => {
   return (
     <vstack frame="max,topLeading" background={COLORS.bg} padding="12" spacing="8" linkurl={model.baseUrl}>
       <Header model={model} account={account} compact="1" />
-      <WindowLine label="5h" window={account.windows.fiveHour} compact="1" />
-      <WindowLine label="7d" window={account.windows.sevenDay} compact="1" />
+      <WindowLine label="5 hours" window={account.windows.fiveHour} compact="1" />
+      <WindowLine label="7 days" window={account.windows.sevenDay} compact="1" />
       <spacer />
       <ConcurrencyLine concurrency={account.concurrency} compact="1" />
       <text font="caption2" color={COLORS.dim}>Updated {timeText(model.generatedAt)}</text>
@@ -132,8 +132,8 @@ const MediumWidget = ({ model }) => {
     <vstack frame="max,topLeading" background={COLORS.bg} padding="14" spacing="10" linkurl={model.baseUrl}>
       <Header model={model} account={account} />
       <hstack spacing="10" frame="max">
-        <MetricCard label="5h" window={account.windows.fiveHour} />
-        <MetricCard label="7d" window={account.windows.sevenDay} />
+        <MetricCard label="5 hours" window={account.windows.fiveHour} />
+        <MetricCard label="7 days" window={account.windows.sevenDay} />
       </hstack>
       <ConcurrencyLine concurrency={account.concurrency} />
       <Footer model={model} account={account} />
@@ -153,12 +153,12 @@ const LargeWidget = ({ model }) => {
         <SummaryTile label="Accounts" value={safeNumber(summary.total)} sub={`${safeNumber(summary.schedulable)} schedulable`} />
         <SummaryTile label="Warnings" value={safeNumber(summary.warning)} sub={`${safeNumber(summary.unavailable)} unavailable`} />
       </hstack>
-      <WindowLine label="5h" window={account.windows.fiveHour} />
-      <WindowLine label="7d" window={account.windows.sevenDay} />
+      <WindowLine label="5 hours" window={account.windows.fiveHour} />
+      <WindowLine label="7 days" window={account.windows.sevenDay} />
       <ConcurrencyLine concurrency={account.concurrency} />
       <hstack spacing="10" frame="max">
-        <SummaryTile label="5h requests" value={formatCompact(statsValue(account, "fiveHour", "requests"))} sub={`${formatTokens(statsValue(account, "fiveHour", "tokens"))} tokens`} />
-        <SummaryTile label="7d requests" value={formatCompact(statsValue(account, "sevenDay", "requests"))} sub={`${formatTokens(statsValue(account, "sevenDay", "tokens"))} tokens`} />
+        <SummaryTile label="5-hour requests" value={formatCompact(statsValue(account, "fiveHour", "requests"))} sub={`${formatTokens(statsValue(account, "fiveHour", "tokens"))} tokens`} />
+        <SummaryTile label="7-day requests" value={formatCompact(statsValue(account, "sevenDay", "requests"))} sub={`${formatTokens(statsValue(account, "sevenDay", "tokens"))} tokens`} />
       </hstack>
       <Footer model={model} account={account} />
     </vstack>

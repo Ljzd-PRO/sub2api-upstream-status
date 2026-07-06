@@ -62,8 +62,8 @@ export function normalizeAccount(
       ? "account-extra"
       : usage?.source ?? "none";
 
-  const fiveHour = normalizeWindow("5h", "5h window", usage?.five_hour ?? null, source, now);
-  const sevenDay = normalizeWindow("7d", "7d window", usage?.seven_day ?? null, source, now);
+  const fiveHour = normalizeWindow("5h", "5-hour window", usage?.five_hour ?? null, source, now);
+  const sevenDay = normalizeWindow("7d", "7-day window", usage?.seven_day ?? null, source, now);
   const { health, reason } = deriveHealth(account, fiveHour, sevenDay, usageError, now);
 
   return {

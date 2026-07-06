@@ -90,7 +90,7 @@ function createAccessoryBase() {
 function createAccessoryInline(data) {
   const widget = createAccessoryBase();
   const text = data.ok
-    ? `${healthText(data)} - 5h ${formatPercent(data.fiveHour.utilization)} - 7d ${formatPercent(data.sevenDay.utilization)}`
+    ? `${healthText(data)} - 5 hours ${formatPercent(data.fiveHour.utilization)} - 7 days ${formatPercent(data.sevenDay.utilization)}`
     : "sub2api - unavailable";
   const line = widget.addText(text);
   line.font = Font.semiboldSystemFont(12);
@@ -110,7 +110,7 @@ function createAccessoryCircular(data) {
   value.font = Font.boldSystemFont(data.ok ? 16 : 13);
   value.centerAlignText();
 
-  const label = stack.addText(data.ok ? "5h" : "API");
+  const label = stack.addText(data.ok ? "5 hours" : "API");
   label.font = Font.mediumSystemFont(10);
   label.centerAlignText();
   stack.addSpacer();
@@ -130,7 +130,7 @@ function createAccessoryRectangular(data) {
   addText(widget, `${healthText(data)} - ${data.accountName}`, 12, "semibold", palette.text, 1);
   addText(
     widget,
-    `5h ${formatPercent(data.fiveHour.utilization)} - 7d ${formatPercent(data.sevenDay.utilization)} - C ${formatConcurrency(data.concurrency)}`,
+    `5 hours ${formatPercent(data.fiveHour.utilization)} - 7 days ${formatPercent(data.sevenDay.utilization)} - C ${formatConcurrency(data.concurrency)}`,
     11,
     "regular",
     palette.dim,
@@ -149,9 +149,9 @@ function createSmallWidget(data) {
 
   renderHeader(widget, data, "small");
   widget.addSpacer(10);
-  renderWindowCompact(widget, "5h", data.fiveHour);
+  renderWindowCompact(widget, "5 hours", data.fiveHour);
   widget.addSpacer(8);
-  renderWindowCompact(widget, "7d", data.sevenDay);
+  renderWindowCompact(widget, "7 days", data.sevenDay);
   widget.addSpacer();
   renderConcurrencyLine(widget, data.concurrency);
   return widget;
@@ -171,8 +171,8 @@ function createMediumWidget(data) {
   const row = widget.addStack();
   row.layoutHorizontally();
   row.spacing = 10;
-  renderMetricCard(row, "5h", data.fiveHour, true, 106);
-  renderMetricCard(row, "7d", data.sevenDay, true, 106);
+  renderMetricCard(row, "5 hours", data.fiveHour, true, 106);
+  renderMetricCard(row, "7 days", data.sevenDay, true, 106);
   widget.addSpacer(10);
   renderFooter(widget, data);
   return widget;
@@ -188,9 +188,9 @@ function createLargeWidget(data) {
 
   renderHeader(widget, data, "large");
   widget.addSpacer(12);
-  renderWindowDetailed(widget, "5h", data.fiveHour);
+  renderWindowDetailed(widget, "5 hours", data.fiveHour);
   widget.addSpacer(12);
-  renderWindowDetailed(widget, "7d", data.sevenDay);
+  renderWindowDetailed(widget, "7 days", data.sevenDay);
   widget.addSpacer();
   renderTodayRow(widget, data);
   widget.addSpacer(8);
@@ -212,14 +212,14 @@ function createExtraLargeWidget(data) {
   const top = widget.addStack();
   top.layoutHorizontally();
   top.spacing = 12;
-  renderMetricCard(top, "5h", data.fiveHour, true, 120);
-  renderMetricCard(top, "7d", data.sevenDay, true, 120);
+  renderMetricCard(top, "5 hours", data.fiveHour, true, 120);
+  renderMetricCard(top, "7 days", data.sevenDay, true, 120);
   renderConcurrencyCard(top, data.concurrency);
 
   widget.addSpacer(14);
-  renderWindowDetailed(widget, "5h", data.fiveHour);
+  renderWindowDetailed(widget, "5 hours", data.fiveHour);
   widget.addSpacer(12);
-  renderWindowDetailed(widget, "7d", data.sevenDay);
+  renderWindowDetailed(widget, "7 days", data.sevenDay);
   widget.addSpacer();
   renderTodayRow(widget, data);
   widget.addSpacer(8);

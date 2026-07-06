@@ -11,8 +11,8 @@ Public read-only Next.js panel for selected sub2api upstream account usage windo
 ## Features
 
 - Read-only public dashboard for selected upstream accounts
-- 5h and 7d usage windows with reset time and countdown
-- 5h and 7d request counts and token usage, both per account and in dashboard summary
+- 5 hours and 7 days usage windows with reset time and countdown
+- 5 hours and 7 days request counts and token usage, both per account and in dashboard summary
 - Real-time concurrency capacity sync per account
 - Frontend auto refresh countdown with a per-browser pause switch
 - Automatic language detection with Simplified Chinese, English, and Traditional Chinese
