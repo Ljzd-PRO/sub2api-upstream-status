@@ -26,7 +26,9 @@ export function WindowMeter({ window, locale, timeZone, t }: WindowMeterProps) {
           {window.key === "5h" ? <Clock size={15} aria-hidden /> : <CalendarDays size={15} aria-hidden />}
           <span>{label}</span>
         </div>
-        <strong>{formatPercent(window.utilization, t("common.noData"))}</strong>
+        <strong>
+          {t("window.consumed")} {formatPercent(window.utilization, t("common.noData"))}
+        </strong>
       </div>
 
       <div className="meter-track" aria-label={`${label} ${t("window.usage")}`}>
