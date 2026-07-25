@@ -38,5 +38,8 @@ describe("translate", () => {
     expect(translate("zh-TW", "openai.label")).toBe("上游 OpenAI 狀態");
     expect(translate("en", "openai.label")).toBe("Upstream OpenAI status");
     expect(translate("en", "openai.status.monitoring")).toBe("Monitoring");
+    expect(translate("zh-CN", "filters.show")).toBe("展开筛选");
+    expect(translate("zh-TW", "filters.hide")).toBe("收起篩選");
+    expect(translate("en", "filters.show")).toBe("Show filters");
   });
 });

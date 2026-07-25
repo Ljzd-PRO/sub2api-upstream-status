@@ -4,10 +4,12 @@ import {
   Activity,
   AlertTriangle,
   CalendarDays,
+  ChevronDown,
   Clock3,
   Eye,
   RefreshCw,
-  Search
+  Search,
+  SlidersHorizontal
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -44,6 +46,7 @@ export function StatusDashboard() {
   const [search, setSearch] = useState("");
   const [platform, setPlatform] = useState("all");
   const [health, setHealth] = useState<HealthFilter>("all");
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [autoRefreshEnabled, setAutoRefreshEnabledState] = useState(true);
   const [nextRefreshAt, setNextRefreshAt] = useState<number | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -385,7 +388,24 @@ export function StatusDashboard() {
       </section>
 
       <section className="toolbar" aria-label={t("filters.label")}>
-        <div className="toolbar__filters">
+        <button
+          className="mobile-filter-toggle"
+          type="button"
+          aria-controls="dashboard-filters"
+          aria-expanded={filtersExpanded}
+          aria-label={t(filtersExpanded ? "filters.hide" : "filters.show")}
+          title={t(filtersExpanded ? "filters.hide" : "filters.show")}
+          onClick={() => setFiltersExpanded((expanded) => !expanded)}
+        >
+          <SlidersHorizontal size={17} aria-hidden />
+          <span>{t("filters.label")}</span>
+          <ChevronDown size={18} aria-hidden />
+        </button>
+
+        <div
+          className={`toolbar__filters${filtersExpanded ? "" : " toolbar__filters--collapsed"}`}
+          id="dashboard-filters"
+        >
           <label className="search-box">
             <Search size={17} aria-hidden />
             <input

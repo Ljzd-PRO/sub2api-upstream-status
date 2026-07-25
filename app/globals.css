@@ -236,6 +236,10 @@ button:disabled {
   align-items: center;
 }
 
+.mobile-filter-toggle {
+  display: none;
+}
+
 .toolbar__status {
   display: flex;
   min-width: 0;
@@ -1019,6 +1023,33 @@ button:disabled {
 
   .icon-button {
     width: 100%;
+  }
+
+  .mobile-filter-toggle {
+    display: flex;
+    width: 100%;
+    height: 40px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    background: var(--surface);
+    font-weight: 700;
+  }
+
+  .mobile-filter-toggle svg:last-child {
+    margin-left: auto;
+    transition: transform 160ms ease;
+  }
+
+  .mobile-filter-toggle[aria-expanded="true"] svg:last-child {
+    transform: rotate(180deg);
+  }
+
+  .toolbar__filters--collapsed {
+    display: none;
   }
 
   .toolbar__filters,
