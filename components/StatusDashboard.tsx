@@ -12,6 +12,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AccountCard } from "@/components/AccountCard";
+import { OpenAIStatusBanner } from "@/components/OpenAIStatusBanner";
 import { formatCompactNumber, formatDateTime, platformLabel } from "@/lib/format";
 import { appLocales, useI18n, type AppLocale, type LocaleChoice } from "@/lib/i18n";
 import {
@@ -22,7 +23,12 @@ import {
   shouldAutoRefresh
 } from "@/lib/refresh";
 import { useTimeZone, type TimeZoneChoice } from "@/lib/timezone";
-import type { HealthStatus, LiveConcurrencyPayload, PanelPayload } from "@/lib/types";
+import type {
+  HealthStatus,
+  LiveConcurrencyPayload,
+  OpenAIStatusPayload,
+  PanelPayload
+} from "@/lib/types";
 
 type HealthFilter = "all" | HealthStatus;
 
@@ -41,8 +47,11 @@ export function StatusDashboard() {
   const [autoRefreshEnabled, setAutoRefreshEnabledState] = useState(true);
   const [nextRefreshAt, setNextRefreshAt] = useState<number | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [openAIStatus, setOpenAIStatus] = useState<OpenAIStatusPayload | null>(null);
+  const [openAIStatusLoading, setOpenAIStatusLoading] = useState(true);
   const inFlight = useRef(false);
   const liveInFlight = useRef(false);
+  const openAIStatusInFlight = useRef(false);
   const dataRef = useRef<PanelPayload | null>(null);
   const autoRefreshEnabledRef = useRef(true);
   const { choice: localeChoice, locale, setChoice: setLocaleChoice, t } = useI18n();
@@ -106,6 +115,59 @@ export function StatusDashboard() {
   useEffect(() => {
     void load(false);
   }, [load]);
+
+  const loadOpenAIStatus = useCallback(async () => {
+    if (openAIStatusInFlight.current) return;
+    openAIStatusInFlight.current = true;
+
+    try {
+      const response = await fetch("/api/openai-status", { cache: "no-store" });
+      const payload = (await response.json()) as OpenAIStatusPayload | ApiError;
+      if (!response.ok || !("overall" in payload)) {
+        throw new Error("OpenAI status request failed");
+      }
+      setOpenAIStatus(payload);
+    } catch {
+      setOpenAIStatus((current) => current ? { ...current, stale: true } : null);
+    } finally {
+      openAIStatusInFlight.current = false;
+      setOpenAIStatusLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadOpenAIStatus();
+  }, [loadOpenAIStatus]);
+
+  useEffect(() => {
+    if (!autoRefreshEnabled) return;
+
+    void loadOpenAIStatus();
+    const intervalSeconds = normalizeOpenAIRefreshInterval(
+      openAIStatus?.refreshIntervalSeconds
+    );
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void loadOpenAIStatus();
+      }
+    }, intervalSeconds * 1000);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void loadOpenAIStatus();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [
+    autoRefreshEnabled,
+    loadOpenAIStatus,
+    openAIStatus?.refreshIntervalSeconds
+  ]);
 
   useEffect(() => {
     if (!autoRefreshEnabled || nextRefreshAt === null) {
@@ -257,6 +319,10 @@ export function StatusDashboard() {
     document.title = title;
   }, [title]);
 
+  const refreshAll = useCallback(() => {
+    void Promise.all([load(true), loadOpenAIStatus()]);
+  }, [load, loadOpenAIStatus]);
+
   return (
     <main className="dashboard-shell">
       <header className="dashboard-header">
@@ -270,7 +336,7 @@ export function StatusDashboard() {
         <button
           className="icon-button"
           type="button"
-          onClick={() => void load(true)}
+          onClick={refreshAll}
           disabled={refreshing}
           aria-label={t("action.refresh")}
           title={t("action.refresh")}
@@ -396,6 +462,14 @@ export function StatusDashboard() {
         </div>
       </section>
 
+      <OpenAIStatusBanner
+        data={openAIStatus}
+        loading={openAIStatusLoading}
+        locale={locale}
+        timeZone={timeZone}
+        t={t}
+      />
+
       {loading ? (
         <section className="account-grid" aria-label={t("common.loadingAccounts")}>
           {Array.from({ length: 6 }).map((_, index) => (
@@ -421,6 +495,11 @@ export function StatusDashboard() {
 function formatRefreshCountdown(seconds: number | null, t: ReturnType<typeof useI18n>["t"]): string {
   if (seconds === null) return t("common.unknown");
   return `${seconds}${t("refresh.seconds")}`;
+}
+
+function normalizeOpenAIRefreshInterval(value: number | null | undefined): number {
+  if (!Number.isFinite(value)) return 10;
+  return Math.min(3600, Math.max(10, Math.floor(value as number)));
 }
 
 function languageLabel(locale: AppLocale): string {

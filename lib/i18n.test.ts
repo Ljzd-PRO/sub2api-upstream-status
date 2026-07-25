@@ -32,5 +32,11 @@ describe("translate", () => {
     expect(translate("zh-CN", "summary.accounts")).toBe("账号");
     expect(translate("zh-TW", "summary.accounts")).toBe("帳號");
     expect(translate("en", "summary.accounts")).toBe("Accounts");
+    expect(translate("zh-CN", "openai.operational")).toBe("OpenAI 系统运行正常");
+    expect(translate("zh-CN", "openai.label")).toBe("上游 OpenAI 状态");
+    expect(translate("zh-TW", "openai.stale")).toBe("上次已知狀態");
+    expect(translate("zh-TW", "openai.label")).toBe("上游 OpenAI 狀態");
+    expect(translate("en", "openai.label")).toBe("Upstream OpenAI status");
+    expect(translate("en", "openai.status.monitoring")).toBe("Monitoring");
   });
 });
