@@ -15,9 +15,16 @@ export interface ServerConfig {
   panelTitle: string;
 }
 
+export interface OpenAIStatusConfig {
+  refreshIntervalSeconds: number;
+  requestTimeoutMs: number;
+}
+
 const DEFAULT_REFRESH_SECONDS = 60;
 const DEFAULT_TIMEOUT_MS = 15000;
 const DEFAULT_TITLE = "sub2api upstream status";
+const DEFAULT_OPENAI_STATUS_REFRESH_SECONDS = 10;
+const DEFAULT_OPENAI_STATUS_TIMEOUT_MS = 8000;
 
 export function parseAccountIds(value: string | undefined): number[] {
   if (!value) return [];
@@ -98,5 +105,24 @@ export function getServerConfig(env: NodeJS.ProcessEnv = process.env): ServerCon
       60000
     ),
     panelTitle: env.NEXT_PUBLIC_PANEL_TITLE?.trim() || DEFAULT_TITLE
+  };
+}
+
+export function getOpenAIStatusConfig(
+  env: NodeJS.ProcessEnv = process.env
+): OpenAIStatusConfig {
+  return {
+    refreshIntervalSeconds: parsePositiveInteger(
+      env.OPENAI_STATUS_REFRESH_INTERVAL_SECONDS,
+      DEFAULT_OPENAI_STATUS_REFRESH_SECONDS,
+      10,
+      3600
+    ),
+    requestTimeoutMs: parsePositiveInteger(
+      env.OPENAI_STATUS_REQUEST_TIMEOUT_MS,
+      DEFAULT_OPENAI_STATUS_TIMEOUT_MS,
+      1000,
+      30000
+    )
   };
 }

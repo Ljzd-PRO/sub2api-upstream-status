@@ -36,6 +36,8 @@ Create `.env` from `.env.example`.
 - `SUB2API_ACCOUNT_IDS`: comma or space separated upstream account IDs to show
 - `MASK_ACCOUNT_NAMES`: set to `true` to mask account names in the public API and UI
 - `REFRESH_INTERVAL_SECONDS`: browser polling interval, default `60`
+- `OPENAI_STATUS_REFRESH_INTERVAL_SECONDS`: OpenAI Status polling and server cache interval, default `10`
+- `OPENAI_STATUS_REQUEST_TIMEOUT_MS`: OpenAI Status request timeout, default `8000`
 - `NEXT_PUBLIC_PANEL_TITLE`: dashboard title
 
 The admin key is only read by the Next.js server route. It is not returned to the browser.

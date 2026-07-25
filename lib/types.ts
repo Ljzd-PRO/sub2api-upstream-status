@@ -179,3 +179,45 @@ export interface LiveConcurrencyPayload {
   generatedAt: string;
   accounts: LiveConcurrencyAccount[];
 }
+
+export type OpenAIStatusIndicator =
+  | "none"
+  | "minor"
+  | "major"
+  | "critical"
+  | "maintenance"
+  | "unknown";
+
+export type OpenAIIncidentStatus =
+  | "investigating"
+  | "identified"
+  | "monitoring"
+  | "resolved"
+  | "unknown";
+
+export interface OpenAIStatusUpdate {
+  body: string;
+  status: OpenAIIncidentStatus;
+  updatedAt: string | null;
+}
+
+export interface OpenAIStatusIncident {
+  id: string;
+  name: string;
+  impact: OpenAIStatusIndicator;
+  status: OpenAIIncidentStatus;
+  updatedAt: string | null;
+  latestUpdate: OpenAIStatusUpdate | null;
+  url: string;
+}
+
+export interface OpenAIStatusPayload {
+  fetchedAt: string;
+  refreshIntervalSeconds: number;
+  stale: boolean;
+  overall: {
+    indicator: OpenAIStatusIndicator;
+    description: string;
+  };
+  incidents: OpenAIStatusIncident[];
+}
