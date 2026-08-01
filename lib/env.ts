@@ -1,3 +1,5 @@
+import type { UsageWindowKey } from "@/lib/types";
+
 export class ConfigError extends Error {
   constructor(message: string) {
     super(message);
@@ -13,6 +15,7 @@ export interface ServerConfig {
   refreshIntervalSeconds: number;
   requestTimeoutMs: number;
   panelTitle: string;
+  visibleUsageWindows: UsageWindowKey[];
 }
 
 export interface OpenAIStatusConfig {
@@ -25,6 +28,7 @@ const DEFAULT_TIMEOUT_MS = 15000;
 const DEFAULT_TITLE = "sub2api upstream status";
 const DEFAULT_OPENAI_STATUS_REFRESH_SECONDS = 10;
 const DEFAULT_OPENAI_STATUS_TIMEOUT_MS = 8000;
+const DEFAULT_USAGE_WINDOWS: UsageWindowKey[] = ["5h", "7d"];
 
 export function parseAccountIds(value: string | undefined): number[] {
   if (!value) return [];
@@ -73,6 +77,21 @@ export function parseBooleanFlag(value: string | undefined): boolean {
   return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
 }
 
+export function parseUsageWindows(value: string | undefined): UsageWindowKey[] {
+  if (!value?.trim()) return [...DEFAULT_USAGE_WINDOWS];
+
+  const requested = new Set(
+    value
+      .toLowerCase()
+      .split(/[,\s]+/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+  );
+  const windows = DEFAULT_USAGE_WINDOWS.filter((window) => requested.has(window));
+
+  return windows.length > 0 ? windows : [...DEFAULT_USAGE_WINDOWS];
+}
+
 export function getServerConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const apiBaseUrl = normalizeApiBaseUrl(env.SUB2API_BASE_URL);
   const adminApiKey = env.SUB2API_ADMIN_API_KEY?.trim() ?? "";
@@ -104,7 +123,8 @@ export function getServerConfig(env: NodeJS.ProcessEnv = process.env): ServerCon
       3000,
       60000
     ),
-    panelTitle: env.NEXT_PUBLIC_PANEL_TITLE?.trim() || DEFAULT_TITLE
+    panelTitle: env.NEXT_PUBLIC_PANEL_TITLE?.trim() || DEFAULT_TITLE,
+    visibleUsageWindows: parseUsageWindows(env.DISPLAY_USAGE_WINDOWS)
   };
 }
 

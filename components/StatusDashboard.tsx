@@ -29,7 +29,8 @@ import type {
   HealthStatus,
   LiveConcurrencyPayload,
   OpenAIStatusPayload,
-  PanelPayload
+  PanelPayload,
+  UsageWindowKey
 } from "@/lib/types";
 
 type HealthFilter = "all" | HealthStatus;
@@ -317,6 +318,7 @@ export function StatusDashboard() {
     data?.title && data.title !== "sub2api upstream status"
       ? data.title
       : t("app.title");
+  const visibleUsageWindows: UsageWindowKey[] = data?.visibleUsageWindows ?? ["5h", "7d"];
 
   useEffect(() => {
     document.title = title;
@@ -356,29 +358,37 @@ export function StatusDashboard() {
         </div>
       ) : null}
 
-      <section className="summary-grid" aria-label={t("common.accounts")}>
+      <section
+        className="summary-grid"
+        data-window-count={visibleUsageWindows.length}
+        aria-label={t("common.accounts")}
+      >
         <SummaryTile
           label={t("summary.accounts")}
           value={data?.summary.total ?? 0}
           detail={`${t("summary.schedulable")} ${data?.summary.schedulable ?? 0}`}
           icon={<Activity size={18} />}
         />
-        <SummaryUsageTile
-          label={t("window.5h")}
-          requests={data?.summary.fiveHour.requests ?? 0}
-          tokens={data?.summary.fiveHour.tokens ?? 0}
-          icon={<Clock3 size={18} />}
-          locale={locale}
-          t={t}
-        />
-        <SummaryUsageTile
-          label={t("window.7d")}
-          requests={data?.summary.sevenDay.requests ?? 0}
-          tokens={data?.summary.sevenDay.tokens ?? 0}
-          icon={<CalendarDays size={18} />}
-          locale={locale}
-          t={t}
-        />
+        {visibleUsageWindows.includes("5h") ? (
+          <SummaryUsageTile
+            label={t("window.5h")}
+            requests={data?.summary.fiveHour.requests ?? 0}
+            tokens={data?.summary.fiveHour.tokens ?? 0}
+            icon={<Clock3 size={18} />}
+            locale={locale}
+            t={t}
+          />
+        ) : null}
+        {visibleUsageWindows.includes("7d") ? (
+          <SummaryUsageTile
+            label={t("window.7d")}
+            requests={data?.summary.sevenDay.requests ?? 0}
+            tokens={data?.summary.sevenDay.tokens ?? 0}
+            icon={<CalendarDays size={18} />}
+            locale={locale}
+            t={t}
+          />
+        ) : null}
         <SummaryTile
           label={t("summary.health")}
           value={data?.summary.warning ?? 0}
@@ -499,7 +509,14 @@ export function StatusDashboard() {
       ) : filteredAccounts.length > 0 ? (
         <section className="account-grid" aria-label={t("common.accounts")}>
           {filteredAccounts.map((account) => (
-            <AccountCard key={account.id} account={account} locale={locale} timeZone={timeZone} t={t} />
+            <AccountCard
+              key={account.id}
+              account={account}
+              locale={locale}
+              timeZone={timeZone}
+              t={t}
+              visibleUsageWindows={visibleUsageWindows}
+            />
           ))}
         </section>
       ) : (

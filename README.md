@@ -12,6 +12,7 @@ Public read-only Next.js panel for selected sub2api upstream account usage windo
 
 - Read-only public dashboard for selected upstream accounts
 - 5 hours and 7 days usage windows with reset time and countdown
+- Runtime filtering of visible 5-hour and 7-day usage windows
 - 5 hours and 7 days request counts and token usage, both per account and in dashboard summary
 - Real-time concurrency capacity sync per account
 - Frontend auto refresh countdown with a per-browser pause switch
@@ -35,6 +36,7 @@ Create `.env` from `.env.example`.
 - `SUB2API_ADMIN_API_KEY`: admin API key sent server-side as `x-api-key`
 - `SUB2API_ACCOUNT_IDS`: comma or space separated upstream account IDs to show
 - `MASK_ACCOUNT_NAMES`: set to `true` to mask account names in the public API and UI
+- `DISPLAY_USAGE_WINDOWS`: visible usage windows, `5h`, `7d`, or `5h,7d` (default)
 - `REFRESH_INTERVAL_SECONDS`: browser polling interval, default `60`
 - `OPENAI_STATUS_REFRESH_INTERVAL_SECONDS`: OpenAI Status polling and server cache interval, default `10`
 - `OPENAI_STATUS_REQUEST_TIMEOUT_MS`: OpenAI Status request timeout, default `8000`

@@ -54,6 +54,7 @@ export async function GET() {
       generatedAt: now.toISOString(),
       refreshIntervalSeconds: config.refreshIntervalSeconds,
       title: config.panelTitle,
+      visibleUsageWindows: config.visibleUsageWindows,
       summary: buildSummary(accounts),
       accounts
     };

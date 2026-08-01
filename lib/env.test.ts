@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   getOpenAIStatusConfig,
   getServerConfig,
-  parseBooleanFlag
+  parseBooleanFlag,
+  parseUsageWindows
 } from "@/lib/env";
 
 describe("parseBooleanFlag", () => {
@@ -32,6 +33,35 @@ describe("getServerConfig", () => {
     });
 
     expect(config.maskAccountNames).toBe(true);
+  });
+
+  it("reads the visible usage window filter", () => {
+    const config = getServerConfig({
+      NODE_ENV: "test",
+      SUB2API_BASE_URL: "https://sub2api.example",
+      SUB2API_ADMIN_API_KEY: "secret",
+      SUB2API_ACCOUNT_IDS: "1",
+      DISPLAY_USAGE_WINDOWS: "7d"
+    });
+
+    expect(config.visibleUsageWindows).toEqual(["7d"]);
+  });
+});
+
+describe("parseUsageWindows", () => {
+  it("shows both usage windows by default", () => {
+    expect(parseUsageWindows(undefined)).toEqual(["5h", "7d"]);
+    expect(parseUsageWindows(" ")).toEqual(["5h", "7d"]);
+  });
+
+  it("accepts a comma or space separated subset in canonical order", () => {
+    expect(parseUsageWindows("7D, 5H, 7d")).toEqual(["5h", "7d"]);
+    expect(parseUsageWindows("7d")).toEqual(["7d"]);
+    expect(parseUsageWindows("5h unknown")).toEqual(["5h"]);
+  });
+
+  it("falls back to both windows when no supported value is present", () => {
+    expect(parseUsageWindows("daily,monthly")).toEqual(["5h", "7d"]);
   });
 });
 

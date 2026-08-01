@@ -5,16 +5,28 @@ import { AlertTriangle, Ban, CheckCircle2, CircleOff, Gauge, TimerReset } from "
 import { WindowMeter } from "@/components/WindowMeter";
 import { formatDateTime, formatPercent, platformLabel } from "@/lib/format";
 import type { AppLocale, TFunction } from "@/lib/i18n";
-import type { HealthStatus, PanelAccountStatus, PanelConcurrency } from "@/lib/types";
+import type {
+  HealthStatus,
+  PanelAccountStatus,
+  PanelConcurrency,
+  UsageWindowKey
+} from "@/lib/types";
 
 interface AccountCardProps {
   account: PanelAccountStatus;
   locale: AppLocale;
   timeZone: string;
   t: TFunction;
+  visibleUsageWindows: UsageWindowKey[];
 }
 
-export function AccountCard({ account, locale, timeZone, t }: AccountCardProps) {
+export function AccountCard({
+  account,
+  locale,
+  timeZone,
+  t,
+  visibleUsageWindows
+}: AccountCardProps) {
   const HealthIcon = healthIcon(account.health);
 
   return (
@@ -42,8 +54,12 @@ export function AccountCard({ account, locale, timeZone, t }: AccountCardProps) 
       ) : null}
 
       <div className="window-list">
-        <WindowMeter window={account.windows.fiveHour} locale={locale} timeZone={timeZone} t={t} />
-        <WindowMeter window={account.windows.sevenDay} locale={locale} timeZone={timeZone} t={t} />
+        {visibleUsageWindows.includes("5h") ? (
+          <WindowMeter window={account.windows.fiveHour} locale={locale} timeZone={timeZone} t={t} />
+        ) : null}
+        {visibleUsageWindows.includes("7d") ? (
+          <WindowMeter window={account.windows.sevenDay} locale={locale} timeZone={timeZone} t={t} />
+        ) : null}
       </div>
 
       <footer className="account-card__footer">

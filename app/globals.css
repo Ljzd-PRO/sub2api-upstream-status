@@ -134,6 +134,12 @@ button:disabled {
   margin-bottom: 14px;
 }
 
+@media (min-width: 901px) {
+  .summary-grid[data-window-count="1"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .summary-tile {
   display: flex;
   min-height: 108px;

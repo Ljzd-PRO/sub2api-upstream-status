@@ -1,6 +1,7 @@
 export type HealthStatus = "ok" | "warning" | "exhausted" | "unavailable";
 export type WindowState = "normal" | "warning" | "danger" | "exhausted" | "unknown";
 export type UsageSource = "passive" | "active" | "account-extra" | "none";
+export type UsageWindowKey = "5h" | "7d";
 
 export interface Sub2APIAccount {
   id: number;
@@ -108,7 +109,7 @@ export interface PanelConcurrency {
 }
 
 export interface PanelUsageWindow {
-  key: "5h" | "7d";
+  key: UsageWindowKey;
   label: string;
   available: boolean;
   utilization: number | null;
@@ -160,6 +161,7 @@ export interface PanelPayload {
   generatedAt: string;
   refreshIntervalSeconds: number;
   title: string;
+  visibleUsageWindows: UsageWindowKey[];
   summary: PanelSummary;
   accounts: PanelAccountStatus[];
 }
