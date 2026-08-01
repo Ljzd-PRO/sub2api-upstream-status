@@ -15,6 +15,7 @@ import type {
   PanelPayload,
   Sub2APIAccountStats,
   Sub2APIAccountUsageStats,
+  Sub2APIOpenAIQuotaUsage,
   Sub2APIUsageInfo
 } from "@/lib/types";
 
@@ -87,6 +88,9 @@ async function fetchAccountStatus(
       getAccountTotals(client, id)
     ]);
     const fallbackUsage = buildOpenAIUsageFromExtra(account, now);
+    const quotaPromise: Promise<Sub2APIOpenAIQuotaUsage | null> = shouldFetchActiveUsage(account)
+      ? client.getOpenAIQuota(id).catch(() => null)
+      : Promise.resolve(null);
     let usage: Sub2APIUsageInfo | null = fallbackUsage;
     let usageError: string | null = null;
 
@@ -106,9 +110,18 @@ async function fetchAccountStatus(
       }
     }
 
+    const openAIQuota = await quotaPromise;
+
     return {
       id,
-      account: normalizeAccount(maskName ? maskSub2APIAccountName(account) : account, usage, usageError, now, stats),
+      account: normalizeAccount(
+        maskName ? maskSub2APIAccountName(account) : account,
+        usage,
+        usageError,
+        now,
+        stats,
+        openAIQuota
+      ),
       error: null
     };
   } catch (error) {

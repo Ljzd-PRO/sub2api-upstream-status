@@ -15,6 +15,7 @@ Public read-only Next.js panel for selected sub2api upstream account usage windo
 - Runtime filtering of visible 5-hour and 7-day usage windows
 - 5 hours and 7 days request counts and token usage, both per account and in dashboard summary
 - Real-time concurrency capacity sync per account
+- Available Codex usage-window reset credits per OpenAI OAuth account
 - Frontend auto refresh countdown with a per-browser pause switch
 - Automatic language detection with Simplified Chinese, English, and Traditional Chinese
 - Automatic time zone detection with a per-browser manual time zone selector

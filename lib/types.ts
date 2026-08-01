@@ -58,6 +58,14 @@ export interface Sub2APIUsageInfo {
   error_code?: string;
 }
 
+export interface Sub2APIRateLimitResetCredits {
+  available_count?: number;
+}
+
+export interface Sub2APIOpenAIQuotaUsage {
+  rate_limit_reset_credits?: Sub2APIRateLimitResetCredits | null;
+}
+
 export interface Sub2APIAccountStats {
   requests?: number;
   tokens?: number;
@@ -108,6 +116,11 @@ export interface PanelConcurrency {
   state: WindowState;
 }
 
+export interface PanelResetCredits {
+  supported: boolean;
+  availableCount: number | null;
+}
+
 export interface PanelUsageWindow {
   key: UsageWindowKey;
   label: string;
@@ -135,6 +148,7 @@ export interface PanelAccountStatus {
   updatedAt: string | null;
   rateLimitResetAt: string | null;
   concurrency: PanelConcurrency;
+  resetCredits: PanelResetCredits;
   windows: {
     fiveHour: PanelUsageWindow;
     sevenDay: PanelUsageWindow;

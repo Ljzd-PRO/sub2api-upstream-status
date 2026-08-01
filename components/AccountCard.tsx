@@ -1,6 +1,14 @@
 "use client";
 
-import { AlertTriangle, Ban, CheckCircle2, CircleOff, Gauge, TimerReset } from "lucide-react";
+import {
+  AlertTriangle,
+  Ban,
+  CheckCircle2,
+  CircleOff,
+  Gauge,
+  RotateCcw,
+  TimerReset
+} from "lucide-react";
 
 import { WindowMeter } from "@/components/WindowMeter";
 import { formatDateTime, formatPercent, platformLabel } from "@/lib/format";
@@ -53,6 +61,10 @@ export function AccountCard({
         <ConcurrencyMeter concurrency={account.concurrency} t={t} />
       ) : null}
 
+      {account.resetCredits.supported ? (
+        <ResetCreditsCount availableCount={account.resetCredits.availableCount} t={t} />
+      ) : null}
+
       <div className="window-list">
         {visibleUsageWindows.includes("5h") ? (
           <WindowMeter window={account.windows.fiveHour} locale={locale} timeZone={timeZone} t={t} />
@@ -81,6 +93,33 @@ export function AccountCard({
         </div>
       ) : null}
     </article>
+  );
+}
+
+function ResetCreditsCount({
+  availableCount,
+  t
+}: {
+  availableCount: number | null;
+  t: TFunction;
+}) {
+  const state = availableCount == null ? "unknown" : availableCount > 0 ? "available" : "empty";
+
+  return (
+    <section className="reset-credits" data-state={state}>
+      <div className="reset-credits__label">
+        <RotateCcw size={16} aria-hidden />
+        <div>
+          <span>{t("account.resetCredits")}</span>
+          <small>{t("account.resetCreditsHelp")}</small>
+        </div>
+      </div>
+      <strong>
+        {availableCount == null
+          ? t("common.noData")
+          : `${availableCount} ${t("account.resetCreditsUnit")}`}
+      </strong>
+    </section>
   );
 }
 

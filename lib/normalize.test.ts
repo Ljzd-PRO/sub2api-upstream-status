@@ -5,6 +5,7 @@ import {
   buildOpenAIUsageFromExtra,
   buildSummary,
   normalizeAccount,
+  normalizeResetCredits,
   shouldFetchActiveUsage,
   shouldFetchPassiveUsage
 } from "@/lib/normalize";
@@ -125,6 +126,35 @@ describe("normalizeAccount", () => {
     expect(shouldFetchActiveUsage(baseAccount({ platform: "openai", type: "oauth" }))).toBe(true);
     expect(shouldFetchActiveUsage(baseAccount({ platform: "openai", type: "apikey" }))).toBe(false);
     expect(shouldFetchActiveUsage(baseAccount({ platform: "anthropic", type: "oauth" }))).toBe(false);
+  });
+
+  it("normalizes available OpenAI reset credits", () => {
+    expect(
+      normalizeResetCredits(baseAccount(), {
+        rate_limit_reset_credits: { available_count: 3 }
+      })
+    ).toEqual({
+      supported: true,
+      availableCount: 3
+    });
+  });
+
+  it("keeps reset credits supported when the quota query has no data", () => {
+    expect(normalizeResetCredits(baseAccount(), null)).toEqual({
+      supported: true,
+      availableCount: null
+    });
+  });
+
+  it("hides reset credits for unsupported account types", () => {
+    expect(
+      normalizeResetCredits(baseAccount({ type: "apikey" }), {
+        rate_limit_reset_credits: { available_count: 4 }
+      })
+    ).toEqual({
+      supported: false,
+      availableCount: null
+    });
   });
 
   it("normalizes today request and token totals", () => {

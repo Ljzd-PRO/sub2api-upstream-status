@@ -3,11 +3,13 @@ import type {
   PanelAccountStatus,
   PanelAccountTotals,
   PanelConcurrency,
+  PanelResetCredits,
   PanelSummary,
   PanelUsageWindow,
   PanelWindowTotals,
   Sub2APIAccount,
   Sub2APIAccountStats,
+  Sub2APIOpenAIQuotaUsage,
   Sub2APIWindowStats,
   Sub2APIUsageInfo,
   Sub2APIUsageProgress,
@@ -55,7 +57,8 @@ export function normalizeAccount(
   usage: Sub2APIUsageInfo | null,
   usageError: string | null,
   now: Date = new Date(),
-  todayStats: Sub2APIAccountStats | null = null
+  todayStats: Sub2APIAccountStats | null = null,
+  openAIQuota: Sub2APIOpenAIQuotaUsage | null = null
 ): PanelAccountStatus {
   const source: UsageSource =
     account.platform.toLowerCase() === "openai" && usage && usage.source !== "active"
@@ -80,12 +83,29 @@ export function normalizeAccount(
     updatedAt: usage?.updated_at || account.updated_at || null,
     rateLimitResetAt: account.rate_limit_reset_at || null,
     concurrency: normalizeConcurrency(account),
+    resetCredits: normalizeResetCredits(account, openAIQuota),
     windows: {
       fiveHour,
       sevenDay
     },
     today: normalizeTotals(todayStats),
     usageError: usage?.error || usageError
+  };
+}
+
+export function normalizeResetCredits(
+  account: Sub2APIAccount,
+  quota: Sub2APIOpenAIQuotaUsage | null
+): PanelResetCredits {
+  const supported = shouldFetchActiveUsage(account);
+  if (!supported) {
+    return { supported: false, availableCount: null };
+  }
+
+  const count = numberFromUnknown(quota?.rate_limit_reset_credits?.available_count);
+  return {
+    supported: true,
+    availableCount: count == null ? null : Math.max(0, Math.floor(count))
   };
 }
 

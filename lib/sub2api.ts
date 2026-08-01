@@ -3,6 +3,7 @@ import type {
   Sub2APIAccount,
   Sub2APIAccountUsageStats,
   Sub2APIBatchTodayStats,
+  Sub2APIOpenAIQuotaUsage,
   Sub2APIUsageInfo
 } from "@/lib/types";
 
@@ -50,6 +51,10 @@ export class Sub2APIClient {
 
   getActiveUsage(id: number): Promise<Sub2APIUsageInfo> {
     return this.request<Sub2APIUsageInfo>(`/admin/accounts/${id}/usage?source=active`);
+  }
+
+  getOpenAIQuota(id: number): Promise<Sub2APIOpenAIQuotaUsage> {
+    return this.request<Sub2APIOpenAIQuotaUsage>(`/admin/openai/accounts/${id}/quota`);
   }
 
   getBatchTodayStats(ids: number[]): Promise<Sub2APIBatchTodayStats> {
