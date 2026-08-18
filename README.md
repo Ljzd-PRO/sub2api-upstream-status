@@ -38,6 +38,7 @@ Create `.env` from `.env.example`.
 - `SUB2API_ACCOUNT_IDS`: comma or space separated upstream account IDs to show
 - `MASK_ACCOUNT_NAMES`: set to `true` to mask account names in the public API and UI
 - `DISPLAY_USAGE_WINDOWS`: visible usage windows, `5h`, `7d`, or `5h,7d` (default)
+- `ENABLE_ANNOUNCEMENTS`: show the latest active sub2api announcement, default `true`
 - `REFRESH_INTERVAL_SECONDS`: browser polling interval, default `60`
 - `OPENAI_STATUS_REFRESH_INTERVAL_SECONDS`: OpenAI Status polling and server cache interval, default `10`
 - `OPENAI_STATUS_REQUEST_TIMEOUT_MS`: OpenAI Status request timeout, default `8000`

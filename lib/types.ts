@@ -90,6 +90,29 @@ export interface Sub2APIBatchTodayStats {
   stats?: Record<string, Sub2APIAccountStats>;
 }
 
+export interface Sub2APIAnnouncement {
+  id: number;
+  title: string;
+  content: string;
+  status: string;
+  notify_mode?: string;
+  targeting?: {
+    any_of?: unknown[];
+  } | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Sub2APIAnnouncementList {
+  items: Sub2APIAnnouncement[];
+  total: number;
+  page: number;
+  page_size: number;
+  pages: number;
+}
+
 export interface PanelAccountTotals {
   available: boolean;
   requests: number;
@@ -236,4 +259,21 @@ export interface OpenAIStatusPayload {
     description: string;
   };
   incidents: OpenAIStatusIncident[];
+}
+
+export interface PanelAnnouncement {
+  id: number;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  version: string;
+}
+
+export interface AnnouncementPayload {
+  enabled: boolean;
+  fetchedAt: string;
+  refreshIntervalSeconds: number;
+  stale: boolean;
+  announcement: PanelAnnouncement | null;
 }

@@ -46,6 +46,19 @@ describe("getServerConfig", () => {
 
     expect(config.visibleUsageWindows).toEqual(["7d"]);
   });
+
+  it("enables announcements by default and supports disabling them", () => {
+    const baseEnv: NodeJS.ProcessEnv = {
+      NODE_ENV: "test",
+      SUB2API_BASE_URL: "https://sub2api.example",
+      SUB2API_ADMIN_API_KEY: "secret",
+      SUB2API_ACCOUNT_IDS: "1"
+    };
+
+    expect(getServerConfig(baseEnv).announcementsEnabled).toBe(true);
+    expect(getServerConfig({ ...baseEnv, ENABLE_ANNOUNCEMENTS: "false" }).announcementsEnabled).toBe(false);
+    expect(getServerConfig({ ...baseEnv, ENABLE_ANNOUNCEMENTS: "invalid" }).announcementsEnabled).toBe(true);
+  });
 });
 
 describe("parseUsageWindows", () => {

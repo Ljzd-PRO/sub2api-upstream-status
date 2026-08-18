@@ -16,6 +16,7 @@ export interface ServerConfig {
   requestTimeoutMs: number;
   panelTitle: string;
   visibleUsageWindows: UsageWindowKey[];
+  announcementsEnabled: boolean;
 }
 
 export interface OpenAIStatusConfig {
@@ -72,9 +73,16 @@ function parsePositiveInteger(
   return Math.min(max, Math.max(min, Math.floor(parsed)));
 }
 
-export function parseBooleanFlag(value: string | undefined): boolean {
+export function parseBooleanFlag(value: string | undefined, fallback = false): boolean {
+  if (!value?.trim()) return fallback;
   const normalized = value?.trim().toLowerCase();
-  return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
+  if (normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on") {
+    return true;
+  }
+  if (normalized === "0" || normalized === "false" || normalized === "no" || normalized === "off") {
+    return false;
+  }
+  return fallback;
 }
 
 export function parseUsageWindows(value: string | undefined): UsageWindowKey[] {
@@ -124,7 +132,8 @@ export function getServerConfig(env: NodeJS.ProcessEnv = process.env): ServerCon
       60000
     ),
     panelTitle: env.NEXT_PUBLIC_PANEL_TITLE?.trim() || DEFAULT_TITLE,
-    visibleUsageWindows: parseUsageWindows(env.DISPLAY_USAGE_WINDOWS)
+    visibleUsageWindows: parseUsageWindows(env.DISPLAY_USAGE_WINDOWS),
+    announcementsEnabled: parseBooleanFlag(env.ENABLE_ANNOUNCEMENTS, true)
   };
 }
 

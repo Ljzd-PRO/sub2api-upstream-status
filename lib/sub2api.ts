@@ -2,6 +2,7 @@ import type { ServerConfig } from "@/lib/env";
 import type {
   Sub2APIAccount,
   Sub2APIAccountUsageStats,
+  Sub2APIAnnouncementList,
   Sub2APIBatchTodayStats,
   Sub2APIOpenAIQuotaUsage,
   Sub2APIUsageInfo
@@ -62,6 +63,12 @@ export class Sub2APIClient {
       method: "POST",
       body: JSON.stringify({ account_ids: ids })
     });
+  }
+
+  getAnnouncements(): Promise<Sub2APIAnnouncementList> {
+    return this.request<Sub2APIAnnouncementList>(
+      "/admin/announcements?page=1&page_size=100&status=active&sort_by=created_at&sort_order=desc"
+    );
   }
 
   private async request<T>(

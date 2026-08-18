@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Clock3,
   Eye,
+  Megaphone,
   RefreshCw,
   Search,
   SlidersHorizontal
@@ -14,6 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AccountCard } from "@/components/AccountCard";
+import { AnnouncementModal } from "@/components/AnnouncementModal";
 import { OpenAIStatusBanner } from "@/components/OpenAIStatusBanner";
 import { formatCompactNumber, formatDateTime, platformLabel } from "@/lib/format";
 import { appLocales, useI18n, type AppLocale, type LocaleChoice } from "@/lib/i18n";
@@ -26,9 +28,11 @@ import {
 } from "@/lib/refresh";
 import { useTimeZone, type TimeZoneChoice } from "@/lib/timezone";
 import type {
+  AnnouncementPayload,
   HealthStatus,
   LiveConcurrencyPayload,
   OpenAIStatusPayload,
+  PanelAnnouncement,
   PanelPayload,
   UsageWindowKey
 } from "@/lib/types";
@@ -38,6 +42,8 @@ type HealthFilter = "all" | HealthStatus;
 interface ApiError {
   error?: string;
 }
+
+const announcementReadStorageKey = "sub2api-upstream-status.announcement-read-version";
 
 export function StatusDashboard() {
   const [data, setData] = useState<PanelPayload | null>(null);
@@ -53,9 +59,14 @@ export function StatusDashboard() {
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [openAIStatus, setOpenAIStatus] = useState<OpenAIStatusPayload | null>(null);
   const [openAIStatusLoading, setOpenAIStatusLoading] = useState(true);
+  const [announcementStatus, setAnnouncementStatus] = useState<AnnouncementPayload | null>(null);
+  const [announcementOpen, setAnnouncementOpen] = useState(false);
+  const [announcementUnread, setAnnouncementUnread] = useState(false);
   const inFlight = useRef(false);
   const liveInFlight = useRef(false);
   const openAIStatusInFlight = useRef(false);
+  const announcementInFlight = useRef(false);
+  const announcementRef = useRef<PanelAnnouncement | null>(null);
   const dataRef = useRef<PanelPayload | null>(null);
   const autoRefreshEnabledRef = useRef(true);
   const { choice: localeChoice, locale, setChoice: setLocaleChoice, t } = useI18n();
@@ -142,6 +153,70 @@ export function StatusDashboard() {
   useEffect(() => {
     void loadOpenAIStatus();
   }, [loadOpenAIStatus]);
+
+  const loadAnnouncement = useCallback(async () => {
+    if (announcementInFlight.current) return;
+    announcementInFlight.current = true;
+
+    try {
+      const response = await fetch("/api/announcement", { cache: "no-store" });
+      const payload = (await response.json()) as AnnouncementPayload | ApiError;
+      if (!response.ok || !("enabled" in payload)) {
+        throw new Error("announcement request failed");
+      }
+
+      setAnnouncementStatus(payload);
+      announcementRef.current = payload.announcement;
+      if (!payload.enabled || !payload.announcement) {
+        setAnnouncementOpen(false);
+        setAnnouncementUnread(false);
+        return;
+      }
+
+      const readVersion = window.localStorage.getItem(announcementReadStorageKey);
+      if (readVersion !== payload.announcement.version) {
+        window.localStorage.removeItem(announcementReadStorageKey);
+        setAnnouncementUnread(true);
+        setAnnouncementOpen(true);
+      } else {
+        setAnnouncementUnread(false);
+      }
+    } catch {
+      // Announcement availability must not affect account status loading.
+    } finally {
+      announcementInFlight.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadAnnouncement();
+  }, [loadAnnouncement]);
+
+  useEffect(() => {
+    if (!autoRefreshEnabled || announcementStatus?.enabled === false) return;
+
+    const intervalSeconds = normalizeRefreshIntervalSeconds(
+      announcementStatus?.refreshIntervalSeconds ?? data?.refreshIntervalSeconds
+    );
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") void loadAnnouncement();
+    }, intervalSeconds * 1000);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") void loadAnnouncement();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [
+    announcementStatus?.enabled,
+    announcementStatus?.refreshIntervalSeconds,
+    autoRefreshEnabled,
+    data?.refreshIntervalSeconds,
+    loadAnnouncement
+  ]);
 
   useEffect(() => {
     if (!autoRefreshEnabled) return;
@@ -324,9 +399,18 @@ export function StatusDashboard() {
     document.title = title;
   }, [title]);
 
+  const closeAnnouncement = useCallback(() => {
+    const current = announcementRef.current;
+    if (current) {
+      window.localStorage.setItem(announcementReadStorageKey, current.version);
+    }
+    setAnnouncementUnread(false);
+    setAnnouncementOpen(false);
+  }, []);
+
   const refreshAll = useCallback(() => {
-    void Promise.all([load(true), loadOpenAIStatus()]);
-  }, [load, loadOpenAIStatus]);
+    void Promise.all([load(true), loadOpenAIStatus(), loadAnnouncement()]);
+  }, [load, loadAnnouncement, loadOpenAIStatus]);
 
   return (
     <main className="dashboard-shell">
@@ -338,17 +422,36 @@ export function StatusDashboard() {
           </div>
           <h1>{title}</h1>
         </div>
-        <button
-          className="icon-button"
-          type="button"
-          onClick={refreshAll}
-          disabled={refreshing}
-          aria-label={t("action.refresh")}
-          title={t("action.refresh")}
-        >
-          <RefreshCw size={18} aria-hidden className={refreshing ? "spin" : undefined} />
-          <span>{t("action.refresh")}</span>
-        </button>
+        <div className="dashboard-actions">
+          {announcementStatus?.enabled === true ? (
+            <button
+              className="icon-button announcement-button"
+              type="button"
+              onClick={() => setAnnouncementOpen(true)}
+              disabled={!announcementStatus?.announcement}
+              aria-label={t("action.announcement")}
+              aria-haspopup="dialog"
+              title={announcementStatus.announcement
+                ? t("action.announcement")
+                : t("announcement.empty")}
+            >
+              <Megaphone size={18} aria-hidden />
+              <span>{t("action.announcement")}</span>
+              {announcementUnread ? <i className="announcement-button__dot" aria-hidden /> : null}
+            </button>
+          ) : null}
+          <button
+            className="icon-button"
+            type="button"
+            onClick={refreshAll}
+            disabled={refreshing}
+            aria-label={t("action.refresh")}
+            title={t("action.refresh")}
+          >
+            <RefreshCw size={18} aria-hidden className={refreshing ? "spin" : undefined} />
+            <span>{t("action.refresh")}</span>
+          </button>
+        </div>
       </header>
 
       {error ? (
@@ -525,6 +628,15 @@ export function StatusDashboard() {
           <span>{t("common.noMatchingAccounts")}</span>
         </section>
       )}
+
+      <AnnouncementModal
+        announcement={announcementStatus?.announcement ?? null}
+        locale={locale}
+        onClose={closeAnnouncement}
+        open={announcementOpen}
+        timeZone={timeZone}
+        t={t}
+      />
     </main>
   );
 }

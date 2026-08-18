@@ -38,6 +38,7 @@ ScriptWidget 小组件包位于 [`scriptwidget/sub2api-upstream-status`](scriptw
 - `SUB2API_ACCOUNT_IDS`：要展示的上游账号 ID，支持逗号或空格分隔
 - `MASK_ACCOUNT_NAMES`：设为 `true` 时，在公开 API 和前端 UI 中模糊账号名
 - `DISPLAY_USAGE_WINDOWS`：显示的用量窗口，可设为 `5h`、`7d` 或默认的 `5h,7d`
+- `ENABLE_ANNOUNCEMENTS`：是否显示 sub2api 最新的有效公告，默认 `true`
 - `REFRESH_INTERVAL_SECONDS`：浏览器轮询刷新间隔，默认 `60`
 - `OPENAI_STATUS_REFRESH_INTERVAL_SECONDS`：OpenAI 状态轮询及服务端缓存间隔，默认 `10`
 - `OPENAI_STATUS_REQUEST_TIMEOUT_MS`：OpenAI 状态请求超时时间，默认 `8000`
