@@ -12,9 +12,12 @@
 
 - 公开只读面板，无需登录即可查看选定上游账号状态
 - 展示 `5 小时` 与 `7 天` 用量窗口、窗口结束时间和倒计时
+- 按窗口已过时间给出建议进度，并使用交叉验证后的提前重置概率连续调整
 - 展示 `5 小时` 与 `7 天` 两个窗口内的请求数和 Token 消耗，包含账号级和顶部汇总
+- 在账号平台右侧显示 OpenAI 套餐类型
 - 每个账号的实时并发容量同步
 - 显示每个 OpenAI OAuth 账号可用的 Codex 用量窗口重置次数
+- 展示 OpenAI 官方服务状态，以及独立且明确标注为非官方的 Codex 社区重置预测
 - 前端自动刷新，显示剩余刷新时间，并支持按浏览器单独暂停
 - 自动检测用户语言，支持简体中文、英文、繁体中文
 - 自动检测用户时区，并支持按浏览器手动切换时区
@@ -42,9 +45,22 @@ ScriptWidget 小组件包位于 [`scriptwidget/sub2api-upstream-status`](scriptw
 - `REFRESH_INTERVAL_SECONDS`：浏览器轮询刷新间隔，默认 `60`
 - `OPENAI_STATUS_REFRESH_INTERVAL_SECONDS`：OpenAI 状态轮询及服务端缓存间隔，默认 `10`
 - `OPENAI_STATUS_REQUEST_TIMEOUT_MS`：OpenAI 状态请求超时时间，默认 `8000`
+- `CODEX_RESET_FORECAST_ENABLED`：是否启用社区提前重置预测，默认 `true`
+- `CODEX_RESET_FORECAST_SOURCES`：以逗号分隔的预测源适配器，默认启用全部四个来源
+- `CODEX_RESET_FORECAST_REFRESH_INTERVAL_SECONDS`：浏览器轮询及服务端缓存间隔，默认 `120`，范围 `30-3600`
+- `CODEX_RESET_FORECAST_REQUEST_TIMEOUT_MS`：每个预测来源的请求超时，默认 `8000`，范围 `1000-30000`
+- `CODEX_RESET_FORECAST_MAX_AGE_SECONDS`：允许参与计算的来源最大数据年龄，默认 `1800`，范围 `300-86400`
 - `NEXT_PUBLIC_PANEL_TITLE`：面板标题
 
 admin key 只在 Next.js 服务端路由中读取，不会返回给浏览器。
+
+## 提前重置预测
+
+面板服务端交叉读取 [Codex Runway](https://www.codexrunway.com/api/status.json)、[Codex Reset](https://codex-reset.com/api/forecast)、[SaveMeTibo](https://savemetibo.com/status.json) 和 [codexreset.app](https://codexreset.app/api/signal) 的公开 JSON 数据。计算前会检查数据时效、来源声明状态和最近重置时间的一致性；多个站点引用同一条原始帖子时只视为一条独立证据，最近重置记录明显落后的来源会被剔除。
+
+预测请求只由本面板服务端发起，不会向预测网站发送 sub2api 地址、admin key、账号名或账号用量。预测属于非官方社区估算，不代表 OpenAI 的承诺。
+
+基础建议采用简单的“已过时间 / 完整窗口时长”。存在可靠预测时，再按未来 24 小时和 48 小时提前重置概率的期望值提高建议进度。未注明窗口的全局预测只影响 7 天窗口；5 小时窗口必须有明确的 5 小时信号。限制套餐的信号只作用于匹配套餐。预测过期、数据冲突、时间晚于正常重置或套餐不匹配时，建议值保持为基础时间进度。
 
 ## 本地开发
 
