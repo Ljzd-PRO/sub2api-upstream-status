@@ -1429,7 +1429,8 @@ button:disabled {
 }
 
 .meter-track__recommended,
-.meter-track__fill {
+.meter-track__fill,
+.meter-track__elapsed {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -1447,6 +1448,20 @@ button:disabled {
 .meter-track__fill {
   z-index: 2;
   background: var(--green);
+}
+
+.meter-track__elapsed {
+  z-index: 3;
+  pointer-events: none;
+  background-image: linear-gradient(
+    to right,
+    #ecfdf5 0 3px,
+    #4ade80 3px 5px,
+    transparent 5px 9px
+  );
+  background-position: left center;
+  background-repeat: repeat-x;
+  background-size: 9px 3px;
 }
 
 .concurrency-meter[data-state="warning"] .meter-track__fill,
@@ -1588,6 +1603,14 @@ button:disabled {
 .window-meter__recommendation-text {
   color: var(--muted-strong) !important;
   font-size: 11px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meter-track__recommended,
+  .meter-track__fill,
+  .meter-track__elapsed {
+    transition: none;
+  }
 }
 
 .window-meter__meta span:first-child,

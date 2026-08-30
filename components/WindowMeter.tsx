@@ -30,8 +30,13 @@ export function WindowMeter({
     0,
     Math.min(100, recommendation.recommendedUtilization ?? 0)
   );
+  const elapsedValue = Math.max(
+    0,
+    Math.min(100, recommendation.timeProgressUtilization ?? 0)
+  );
   const hasStats = window.stats !== null;
   const label = window.key === "5h" ? t("window.5h") : t("window.7d");
+  const recommendationText = formatRecommendationText(recommendation, t);
 
   return (
     <section className="window-meter" data-state={window.state}>
@@ -45,11 +50,30 @@ export function WindowMeter({
         </strong>
       </div>
 
-      <div className="meter-track" aria-label={`${label} ${t("window.usage")}`}>
+      <div
+        className="meter-track"
+        role="img"
+        aria-label={`${label}: ${t("window.consumed")} ${formatPercent(window.utilization, t("common.noData"))}; ${recommendationText}`}
+      >
         {recommendation.recommendedUtilization !== null ? (
-          <div className="meter-track__recommended" style={{ width: `${recommendedValue}%` }} />
+          <div
+            className="meter-track__recommended"
+            style={{ width: `${recommendedValue}%` }}
+            aria-hidden="true"
+          />
         ) : null}
-        <div className="meter-track__fill" style={{ width: `${value}%` }} />
+        <div
+          className="meter-track__fill"
+          style={{ width: `${value}%` }}
+          aria-hidden="true"
+        />
+        {recommendation.timeProgressUtilization !== null ? (
+          <div
+            className="meter-track__elapsed"
+            style={{ width: `${elapsedValue}%` }}
+            aria-hidden="true"
+          />
+        ) : null}
       </div>
 
       <div className="window-meter__recommendation">
@@ -57,7 +81,7 @@ export function WindowMeter({
           {t("window.recommended")} {formatPercent(recommendation.recommendedUtilization, t("common.noData"))}
         </span>
         <small className="window-meter__recommendation-text">
-          {formatRecommendationText(recommendation, t)}
+          {recommendationText}
         </small>
         <small>
           {t(recommendation.forecastApplied
