@@ -74,6 +74,7 @@ export function normalizeAccount(
     name: account.name || `Account ${account.id}`,
     platform: account.platform,
     type: account.type,
+    planType: normalizePlanType(openAIQuota?.plan_type),
     status: account.status,
     schedulable: Boolean(account.schedulable),
     health,
@@ -107,6 +108,18 @@ export function normalizeResetCredits(
     supported: true,
     availableCount: count == null ? null : Math.max(0, Math.floor(count))
   };
+}
+
+export function normalizePlanType(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const cleaned = value
+    .replace(/[\u0000-\u001f\u007f]+/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/^chatgpt[\s_-]+/, "")
+    .replace(/[\s_]+/g, "-")
+    .slice(0, 48);
+  return cleaned || null;
 }
 
 export function buildSummary(accounts: PanelAccountStatus[]): PanelSummary {
@@ -251,6 +264,7 @@ function normalizeWindow(
       label,
       available: false,
       utilization: null,
+      timeProgressUtilization: null,
       recommendedUtilization: null,
       state: "unknown",
       resetsAt: null,
@@ -264,14 +278,15 @@ function normalizeWindow(
   const remainingSeconds = computeRemainingSeconds(progress.remaining_seconds, resetAt, now);
   const expired = resetAt ? resetAt.getTime() <= now.getTime() : false;
   const utilization = hasUtilization ? (expired ? 0 : roundOne(Math.max(0, Number(progress.utilization)))) : null;
-  const recommendedUtilization = expired ? 0 : computeRecommendedUtilization(key, remainingSeconds);
+  const timeProgressUtilization = expired ? 0 : computeRecommendedUtilization(key, remainingSeconds);
 
   return {
     key,
     label,
     available: true,
     utilization,
-    recommendedUtilization,
+    timeProgressUtilization,
+    recommendedUtilization: timeProgressUtilization,
     state: utilization == null ? "unknown" : utilizationState(utilization),
     resetsAt: resetAt?.toISOString() ?? null,
     remainingSeconds: expired ? 0 : remainingSeconds,

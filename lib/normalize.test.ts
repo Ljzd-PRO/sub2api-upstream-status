@@ -5,6 +5,7 @@ import {
   buildOpenAIUsageFromExtra,
   buildSummary,
   normalizeAccount,
+  normalizePlanType,
   normalizeResetCredits,
   shouldFetchActiveUsage,
   shouldFetchPassiveUsage
@@ -137,6 +138,19 @@ describe("normalizeAccount", () => {
       supported: true,
       availableCount: 3
     });
+  });
+
+  it("exposes the plan type from the existing OpenAI quota response", () => {
+    const status = normalizeAccount(
+      baseAccount(),
+      null,
+      null,
+      now,
+      null,
+      { plan_type: "ChatGPT_Pro" }
+    );
+
+    expect(status.planType).toBe("pro");
   });
 
   it("keeps reset credits supported when the quota query has no data", () => {
@@ -273,5 +287,13 @@ describe("normalizeAccount", () => {
         tokens: 12002000
       }
     });
+  });
+});
+
+describe("normalizePlanType", () => {
+  it("normalizes known and future plan names without retaining control characters", () => {
+    expect(normalizePlanType(" ChatGPT Plus ")).toBe("plus");
+    expect(normalizePlanType("future_plan\n")).toBe("future-plan");
+    expect(normalizePlanType(null)).toBeNull();
   });
 });

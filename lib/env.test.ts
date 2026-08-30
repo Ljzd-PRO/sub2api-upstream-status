@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getCodexResetForecastConfig,
   getOpenAIStatusConfig,
   getServerConfig,
   parseBooleanFlag,
+  parseCodexResetForecastSources,
   parseUsageWindows
 } from "@/lib/env";
 
@@ -132,5 +134,74 @@ describe("getOpenAIStatusConfig", () => {
       refreshIntervalSeconds: 10,
       requestTimeoutMs: 8000
     });
+  });
+});
+
+describe("getCodexResetForecastConfig", () => {
+  it("uses safe defaults for the public forecast sources", () => {
+    expect(getCodexResetForecastConfig({ NODE_ENV: "test" })).toEqual({
+      enabled: true,
+      sources: ["codex-runway", "codex-reset", "save-me-tibo", "codexreset-app"],
+      refreshIntervalSeconds: 120,
+      requestTimeoutMs: 8000,
+      maxAgeSeconds: 1800
+    });
+  });
+
+  it("reads configured values and clamps all numeric bounds", () => {
+    expect(
+      getCodexResetForecastConfig({
+        NODE_ENV: "test",
+        CODEX_RESET_FORECAST_ENABLED: "false",
+        CODEX_RESET_FORECAST_SOURCES: "save-me-tibo,codex-runway",
+        CODEX_RESET_FORECAST_REFRESH_INTERVAL_SECONDS: "5",
+        CODEX_RESET_FORECAST_REQUEST_TIMEOUT_MS: "99999",
+        CODEX_RESET_FORECAST_MAX_AGE_SECONDS: "120"
+      })
+    ).toEqual({
+      enabled: false,
+      sources: ["codex-runway", "save-me-tibo"],
+      refreshIntervalSeconds: 30,
+      requestTimeoutMs: 30000,
+      maxAgeSeconds: 300
+    });
+
+    expect(
+      getCodexResetForecastConfig({
+        NODE_ENV: "test",
+        CODEX_RESET_FORECAST_REFRESH_INTERVAL_SECONDS: "99999",
+        CODEX_RESET_FORECAST_REQUEST_TIMEOUT_MS: "20",
+        CODEX_RESET_FORECAST_MAX_AGE_SECONDS: "999999"
+      })
+    ).toMatchObject({
+      refreshIntervalSeconds: 3600,
+      requestTimeoutMs: 1000,
+      maxAgeSeconds: 86400
+    });
+  });
+
+  it("falls back when numeric values or source names are invalid", () => {
+    expect(
+      getCodexResetForecastConfig({
+        NODE_ENV: "test",
+        CODEX_RESET_FORECAST_REFRESH_INTERVAL_SECONDS: "invalid",
+        CODEX_RESET_FORECAST_REQUEST_TIMEOUT_MS: "invalid",
+        CODEX_RESET_FORECAST_MAX_AGE_SECONDS: "invalid",
+        CODEX_RESET_FORECAST_SOURCES: "unknown"
+      })
+    ).toMatchObject({
+      refreshIntervalSeconds: 120,
+      requestTimeoutMs: 8000,
+      maxAgeSeconds: 1800,
+      sources: ["codex-runway", "codex-reset", "save-me-tibo", "codexreset-app"]
+    });
+  });
+});
+
+describe("parseCodexResetForecastSources", () => {
+  it("deduplicates supported names in canonical order", () => {
+    expect(
+      parseCodexResetForecastSources("SAVE-ME-TIBO codex-runway save-me-tibo")
+    ).toEqual(["codex-runway", "save-me-tibo"]);
   });
 });

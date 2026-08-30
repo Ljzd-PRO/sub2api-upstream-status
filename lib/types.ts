@@ -2,6 +2,19 @@ export type HealthStatus = "ok" | "warning" | "exhausted" | "unavailable";
 export type WindowState = "normal" | "warning" | "danger" | "exhausted" | "unknown";
 export type UsageSource = "passive" | "active" | "account-extra" | "none";
 export type UsageWindowKey = "5h" | "7d";
+export type CodexResetForecastSourceId =
+  | "codex-runway"
+  | "codex-reset"
+  | "save-me-tibo"
+  | "codexreset-app";
+export type CodexResetForecastState =
+  | "unavailable"
+  | "baseline"
+  | "possible"
+  | "likely"
+  | "scheduled";
+export type CodexResetForecastConfidence = "low" | "medium" | "high";
+export type CodexResetForecastSourceStatus = "ok" | "stale" | "invalid" | "error";
 
 export interface Sub2APIAccount {
   id: number;
@@ -63,6 +76,7 @@ export interface Sub2APIRateLimitResetCredits {
 }
 
 export interface Sub2APIOpenAIQuotaUsage {
+  plan_type?: string | null;
   rate_limit_reset_credits?: Sub2APIRateLimitResetCredits | null;
 }
 
@@ -149,6 +163,7 @@ export interface PanelUsageWindow {
   label: string;
   available: boolean;
   utilization: number | null;
+  timeProgressUtilization: number | null;
   recommendedUtilization: number | null;
   state: WindowState;
   resetsAt: string | null;
@@ -162,6 +177,7 @@ export interface PanelAccountStatus {
   name: string;
   platform: string;
   type: string;
+  planType: string | null;
   status: string;
   schedulable: boolean;
   health: HealthStatus;
@@ -259,6 +275,58 @@ export interface OpenAIStatusPayload {
     description: string;
   };
   incidents: OpenAIStatusIncident[];
+}
+
+export interface CodexResetForecastExpectedWindow {
+  startAt: string;
+  endAt: string;
+  precision: "datetime" | "date" | "horizon";
+}
+
+export interface CodexResetForecastScope {
+  plans: string[];
+  windows: UsageWindowKey[];
+  uncertain: boolean;
+}
+
+export interface CodexResetForecastSource {
+  id: CodexResetForecastSourceId;
+  label: string;
+  status: CodexResetForecastSourceStatus;
+  updatedAt: string | null;
+  probability24h: number | null;
+  probability48h: number | null;
+  eventAt: string | null;
+  confidence: CodexResetForecastConfidence;
+  detail: string;
+  evidenceUrl: string | null;
+}
+
+export interface CodexResetForecastPayload {
+  enabled: boolean;
+  fetchedAt: string;
+  refreshIntervalSeconds: number;
+  stale: boolean;
+  state: CodexResetForecastState;
+  probability24h: number | null;
+  probability48h: number | null;
+  confidence: CodexResetForecastConfidence;
+  expectedWindow: CodexResetForecastExpectedWindow | null;
+  scope: CodexResetForecastScope;
+  agreement: {
+    healthySources: number;
+    contributingSources: number;
+    totalSources: number;
+    independentEvidence: number;
+  };
+  sources: CodexResetForecastSource[];
+}
+
+export interface ForecastRecommendation {
+  timeProgressUtilization: number | null;
+  recommendedUtilization: number | null;
+  forecastApplied: boolean;
+  forecastProbability: number | null;
 }
 
 export interface PanelAnnouncement {
