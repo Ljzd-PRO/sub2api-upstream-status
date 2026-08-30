@@ -19,7 +19,7 @@ Public read-only Next.js panel for selected sub2api upstream account usage windo
 - Read-only public dashboard for selected upstream accounts
 - 5 hours and 7 days usage windows with reset time and countdown
 - Time-progress recommendations, continuously adjusted by cross-checked early-reset probabilities
-- A single usage track overlays current usage (solid), recommended usage (pale green), and elapsed window share (green dashes)
+- The 7-day usage track overlays current usage (solid), recommended usage (pale green), and elapsed window share (inset circular dots)
 - Runtime filtering of visible 5-hour and 7-day usage windows
 - 5 hours and 7 days request counts and token usage, both per account and in dashboard summary
 - OpenAI subscription plan badges next to each account platform
@@ -69,7 +69,7 @@ Forecast requests are made only by this panel server. No sub2api URL, admin key,
 
 The base recommendation is simply the elapsed share of the current window: `elapsed time / full window duration`. A valid forecast raises that target using the expected value of the 24-hour and 48-hour early-reset probabilities. An unscoped global forecast affects only the 7-day window; the 5-hour window requires an explicit 5-hour signal. Plan-scoped signals are applied only to matching account plans. Stale, inconsistent, late, or mismatched forecasts leave the time-based recommendation unchanged.
 
-Each usage window keeps all three readings on one track: solid color shows current usage, pale green shows the recommendation, and short green dashes mark the elapsed share of the window. The current-usage layer remains green, amber, or red according to consumption level and covers the layers beneath it where they overlap.
+The 7-day window keeps all three readings on one track: solid color shows current usage, pale green shows the recommendation, and inset circular dots mark the elapsed share of the window. The 5-hour track omits the dots to keep short-window scanning compact. The current-usage layer remains green, amber, or red according to consumption level and covers the recommendation beneath it.
 
 ## Local Development
 
