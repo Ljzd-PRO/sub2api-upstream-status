@@ -10,9 +10,11 @@ artifacts/
 .env
 .env.local
 .env.*.local
+.ssh/
 *.tsbuildinfo
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .DS_Store
+.gstack/
