@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AccountCard } from "@/components/AccountCard";
 import { AnnouncementModal } from "@/components/AnnouncementModal";
+import { CodexResetForecastBanner } from "@/components/CodexResetForecastBanner";
 import { OpenAIStatusBanner } from "@/components/OpenAIStatusBanner";
 import { formatCompactNumber, formatDateTime, platformLabel } from "@/lib/format";
 import { appLocales, useI18n, type AppLocale, type LocaleChoice } from "@/lib/i18n";
@@ -29,6 +30,7 @@ import {
 import { useTimeZone, type TimeZoneChoice } from "@/lib/timezone";
 import type {
   AnnouncementPayload,
+  CodexResetForecastPayload,
   HealthStatus,
   LiveConcurrencyPayload,
   OpenAIStatusPayload,
@@ -59,12 +61,15 @@ export function StatusDashboard() {
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [openAIStatus, setOpenAIStatus] = useState<OpenAIStatusPayload | null>(null);
   const [openAIStatusLoading, setOpenAIStatusLoading] = useState(true);
+  const [resetForecast, setResetForecast] = useState<CodexResetForecastPayload | null>(null);
+  const [resetForecastLoading, setResetForecastLoading] = useState(true);
   const [announcementStatus, setAnnouncementStatus] = useState<AnnouncementPayload | null>(null);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
   const [announcementUnread, setAnnouncementUnread] = useState(false);
   const inFlight = useRef(false);
   const liveInFlight = useRef(false);
   const openAIStatusInFlight = useRef(false);
+  const resetForecastInFlight = useRef(false);
   const announcementInFlight = useRef(false);
   const announcementRef = useRef<PanelAnnouncement | null>(null);
   const dataRef = useRef<PanelPayload | null>(null);
@@ -153,6 +158,29 @@ export function StatusDashboard() {
   useEffect(() => {
     void loadOpenAIStatus();
   }, [loadOpenAIStatus]);
+
+  const loadResetForecast = useCallback(async () => {
+    if (resetForecastInFlight.current) return;
+    resetForecastInFlight.current = true;
+
+    try {
+      const response = await fetch("/api/codex-reset-forecast", { cache: "no-store" });
+      const payload = (await response.json()) as CodexResetForecastPayload | ApiError;
+      if (!response.ok || !("state" in payload)) {
+        throw new Error("Codex reset forecast request failed");
+      }
+      setResetForecast(payload);
+    } catch {
+      setResetForecast((current) => current ? { ...current, stale: true } : null);
+    } finally {
+      resetForecastInFlight.current = false;
+      setResetForecastLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadResetForecast();
+  }, [loadResetForecast]);
 
   const loadAnnouncement = useCallback(async () => {
     if (announcementInFlight.current) return;
@@ -246,6 +274,32 @@ export function StatusDashboard() {
     autoRefreshEnabled,
     loadOpenAIStatus,
     openAIStatus?.refreshIntervalSeconds
+  ]);
+
+  useEffect(() => {
+    if (!autoRefreshEnabled || resetForecast?.enabled === false) return;
+
+    void loadResetForecast();
+    const intervalSeconds = normalizeForecastRefreshInterval(
+      resetForecast?.refreshIntervalSeconds
+    );
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") void loadResetForecast();
+    }, intervalSeconds * 1000);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") void loadResetForecast();
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [
+    autoRefreshEnabled,
+    loadResetForecast,
+    resetForecast?.enabled,
+    resetForecast?.refreshIntervalSeconds
   ]);
 
   useEffect(() => {
@@ -409,8 +463,13 @@ export function StatusDashboard() {
   }, []);
 
   const refreshAll = useCallback(() => {
-    void Promise.all([load(true), loadOpenAIStatus(), loadAnnouncement()]);
-  }, [load, loadAnnouncement, loadOpenAIStatus]);
+    void Promise.all([
+      load(true),
+      loadOpenAIStatus(),
+      loadResetForecast(),
+      loadAnnouncement()
+    ]);
+  }, [load, loadAnnouncement, loadOpenAIStatus, loadResetForecast]);
 
   return (
     <main className="dashboard-shell">
@@ -603,6 +662,14 @@ export function StatusDashboard() {
         t={t}
       />
 
+      <CodexResetForecastBanner
+        data={resetForecast}
+        loading={resetForecastLoading}
+        locale={locale}
+        timeZone={timeZone}
+        t={t}
+      />
+
       {loading ? (
         <section className="account-grid" aria-label={t("common.loadingAccounts")}>
           {Array.from({ length: 6 }).map((_, index) => (
@@ -619,6 +686,7 @@ export function StatusDashboard() {
               timeZone={timeZone}
               t={t}
               visibleUsageWindows={visibleUsageWindows}
+              resetForecast={resetForecast}
             />
           ))}
         </section>
@@ -649,6 +717,11 @@ function formatRefreshCountdown(seconds: number | null, t: ReturnType<typeof use
 function normalizeOpenAIRefreshInterval(value: number | null | undefined): number {
   if (!Number.isFinite(value)) return 10;
   return Math.min(3600, Math.max(10, Math.floor(value as number)));
+}
+
+function normalizeForecastRefreshInterval(value: number | null | undefined): number {
+  if (!Number.isFinite(value)) return 120;
+  return Math.min(3600, Math.max(30, Math.floor(value as number)));
 }
 
 function languageLabel(locale: AppLocale): string {

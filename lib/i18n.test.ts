@@ -41,5 +41,8 @@ describe("translate", () => {
     expect(translate("zh-CN", "filters.show")).toBe("展开筛选");
     expect(translate("zh-TW", "filters.hide")).toBe("收起篩選");
     expect(translate("en", "filters.show")).toBe("Show filters");
+    expect(translate("zh-CN", "forecast.label")).toBe("Codex 提前重置预测");
+    expect(translate("zh-TW", "forecast.unofficial")).toBe("社群預測 · 非官方");
+    expect(translate("en", "account.planUnknown")).toBe("Plan unknown");
   });
 });

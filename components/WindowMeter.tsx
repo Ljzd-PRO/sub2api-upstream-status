@@ -2,20 +2,34 @@
 
 import { CalendarDays, Clock } from "lucide-react";
 
+import { computeForecastRecommendation } from "@/lib/codex-reset-recommendation";
 import { formatCompactNumber, formatCountdown, formatDateTime, formatMoney, formatPercent } from "@/lib/format";
 import type { AppLocale, TFunction } from "@/lib/i18n";
-import type { PanelUsageWindow } from "@/lib/types";
+import type { CodexResetForecastPayload, PanelUsageWindow } from "@/lib/types";
 
 interface WindowMeterProps {
   window: PanelUsageWindow;
+  planType: string | null;
+  resetForecast: CodexResetForecastPayload | null;
   locale: AppLocale;
   timeZone: string;
   t: TFunction;
 }
 
-export function WindowMeter({ window, locale, timeZone, t }: WindowMeterProps) {
+export function WindowMeter({
+  window,
+  planType,
+  resetForecast,
+  locale,
+  timeZone,
+  t
+}: WindowMeterProps) {
   const value = Math.max(0, Math.min(100, window.utilization ?? 0));
-  const recommendedValue = Math.max(0, Math.min(100, window.recommendedUtilization ?? 0));
+  const recommendation = computeForecastRecommendation(window, planType, resetForecast);
+  const recommendedValue = Math.max(
+    0,
+    Math.min(100, recommendation.recommendedUtilization ?? 0)
+  );
   const hasStats = window.stats !== null;
   const label = window.key === "5h" ? t("window.5h") : t("window.7d");
 
@@ -32,7 +46,7 @@ export function WindowMeter({ window, locale, timeZone, t }: WindowMeterProps) {
       </div>
 
       <div className="meter-track" aria-label={`${label} ${t("window.usage")}`}>
-        {window.recommendedUtilization !== null ? (
+        {recommendation.recommendedUtilization !== null ? (
           <div className="meter-track__recommended" style={{ width: `${recommendedValue}%` }} />
         ) : null}
         <div className="meter-track__fill" style={{ width: `${value}%` }} />
@@ -40,9 +54,16 @@ export function WindowMeter({ window, locale, timeZone, t }: WindowMeterProps) {
 
       <div className="window-meter__recommendation">
         <span>
-          {t("window.recommended")} {formatPercent(window.recommendedUtilization, t("common.noData"))}
+          {t("window.recommended")} {formatPercent(recommendation.recommendedUtilization, t("common.noData"))}
         </span>
-        <small>{t("window.recommendedHelp")}</small>
+        <small className="window-meter__recommendation-text">
+          {formatRecommendationText(recommendation, t)}
+        </small>
+        <small>
+          {t(recommendation.forecastApplied
+            ? "window.recommendedForecastHelp"
+            : "window.recommendedHelp")}
+        </small>
       </div>
 
       <div className="window-meter__meta">
@@ -59,4 +80,24 @@ export function WindowMeter({ window, locale, timeZone, t }: WindowMeterProps) {
       ) : null}
     </section>
   );
+}
+
+function formatRecommendationText(
+  recommendation: ReturnType<typeof computeForecastRecommendation>,
+  t: TFunction
+): string {
+  const elapsed = formatPercent(
+    recommendation.timeProgressUtilization,
+    t("common.noData")
+  );
+  const recommended = formatPercent(
+    recommendation.recommendedUtilization,
+    t("common.noData")
+  );
+  const template = t(recommendation.forecastApplied
+    ? "window.recommendationForecast"
+    : "window.recommendationBaseline");
+  return template
+    .replace("{elapsed}", elapsed)
+    .replace("{recommended}", recommended);
 }

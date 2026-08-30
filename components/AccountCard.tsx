@@ -14,6 +14,7 @@ import { WindowMeter } from "@/components/WindowMeter";
 import { formatDateTime, formatPercent, platformLabel } from "@/lib/format";
 import type { AppLocale, TFunction } from "@/lib/i18n";
 import type {
+  CodexResetForecastPayload,
   HealthStatus,
   PanelAccountStatus,
   PanelConcurrency,
@@ -26,6 +27,7 @@ interface AccountCardProps {
   timeZone: string;
   t: TFunction;
   visibleUsageWindows: UsageWindowKey[];
+  resetForecast: CodexResetForecastPayload | null;
 }
 
 export function AccountCard({
@@ -33,15 +35,22 @@ export function AccountCard({
   locale,
   timeZone,
   t,
-  visibleUsageWindows
+  visibleUsageWindows,
+  resetForecast
 }: AccountCardProps) {
   const HealthIcon = healthIcon(account.health);
+  const planLabel = planTypeLabel(account.planType, t);
 
   return (
     <article className="account-card" data-health={account.health}>
       <header className="account-card__header">
         <div className="account-card__title">
-          <span className="platform-badge">{platformLabel(account.platform)}</span>
+          <div className="account-card__badges">
+            <span className="platform-badge">{platformLabel(account.platform)}</span>
+            <span className="plan-badge" title={planLabel}>
+              {planLabel}
+            </span>
+          </div>
           <h2 title={account.name}>{account.name}</h2>
           <span className="account-card__id">#{account.id}</span>
         </div>
@@ -67,10 +76,24 @@ export function AccountCard({
 
       <div className="window-list">
         {visibleUsageWindows.includes("5h") ? (
-          <WindowMeter window={account.windows.fiveHour} locale={locale} timeZone={timeZone} t={t} />
+          <WindowMeter
+            window={account.windows.fiveHour}
+            planType={account.planType}
+            resetForecast={resetForecast}
+            locale={locale}
+            timeZone={timeZone}
+            t={t}
+          />
         ) : null}
         {visibleUsageWindows.includes("7d") ? (
-          <WindowMeter window={account.windows.sevenDay} locale={locale} timeZone={timeZone} t={t} />
+          <WindowMeter
+            window={account.windows.sevenDay}
+            planType={account.planType}
+            resetForecast={resetForecast}
+            locale={locale}
+            timeZone={timeZone}
+            t={t}
+          />
         ) : null}
       </div>
 
@@ -94,6 +117,28 @@ export function AccountCard({
       ) : null}
     </article>
   );
+}
+
+function planTypeLabel(planType: string | null, t: TFunction): string {
+  if (!planType) return t("account.planUnknown");
+  switch (planType) {
+    case "plus":
+      return "Plus";
+    case "pro":
+      return "Pro";
+    case "team":
+      return "Team";
+    case "business":
+      return "Business";
+    case "enterprise":
+      return "Enterprise";
+    default:
+      return planType
+        .split("-")
+        .filter(Boolean)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ") || t("account.planUnknown");
+  }
 }
 
 function ResetCreditsCount({
