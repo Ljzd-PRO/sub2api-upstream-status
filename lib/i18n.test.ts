@@ -38,9 +38,10 @@ describe("translate", () => {
     expect(translate("zh-TW", "openai.label")).toBe("上游 OpenAI 狀態");
     expect(translate("en", "openai.label")).toBe("Upstream OpenAI status");
     expect(translate("en", "openai.status.monitoring")).toBe("Monitoring");
-    expect(translate("zh-CN", "filters.show")).toBe("展开筛选");
-    expect(translate("zh-TW", "filters.hide")).toBe("收起篩選");
-    expect(translate("en", "filters.show")).toBe("Show filters");
+    expect(translate("zh-CN", "filters.show")).toBe("展开筛选与设置");
+    expect(translate("zh-TW", "filters.hide")).toBe("收起篩選與設定");
+    expect(translate("en", "filters.show")).toBe("Show filters & settings");
+    expect(translate("zh-CN", "openai.expand")).toBe("展开 OpenAI 状态详情");
     expect(translate("zh-CN", "forecast.label")).toBe("Codex 提前重置预测");
     expect(translate("zh-TW", "forecast.unofficial")).toBe("社群預測 · 非官方");
     expect(translate("en", "account.planUnknown")).toBe("Plan unknown");

@@ -76,6 +76,10 @@ button:disabled {
   letter-spacing: 0;
 }
 
+.dashboard-title {
+  min-width: 0;
+}
+
 .eyebrow {
   display: flex;
   align-items: center;
@@ -529,8 +533,9 @@ button:disabled {
   display: none;
 }
 
-.toolbar__status {
+.toolbar__settings {
   display: flex;
+  grid-column: 1 / -1;
   min-width: 0;
   align-items: center;
   justify-content: space-between;
@@ -656,13 +661,43 @@ button:disabled {
 }
 
 .openai-status__header {
+  min-width: 0;
+  background: var(--status-header);
+}
+
+.openai-status__toggle {
   display: flex;
+  width: 100%;
   min-width: 0;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 12px 14px;
-  background: var(--status-header);
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+}
+
+.openai-status__toggle:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.openai-status__toggle-end {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.openai-status__chevron {
+  display: none;
+  flex: 0 0 auto;
+  color: var(--status-accent);
+  transition: transform 160ms ease;
 }
 
 .openai-status__heading {
@@ -1684,7 +1719,7 @@ button:disabled {
     grid-column: 1 / -1;
   }
 
-  .toolbar__status {
+  .toolbar__settings {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -1741,26 +1776,40 @@ button:disabled {
   }
 
   .dashboard-header {
-    flex-direction: column;
-    align-items: stretch;
+    align-items: flex-end;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .dashboard-title {
+    flex: 1 1 auto;
   }
 
   .dashboard-header h1 {
-    font-size: 25px;
+    font-size: 23px;
+    line-height: 1.15;
+  }
+
+  .dashboard-header .eyebrow {
+    gap: 5px;
+    font-size: 11px;
   }
 
   .dashboard-actions {
-    display: grid;
-    width: 100%;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: auto;
+    flex: 0 0 auto;
+    gap: 6px;
   }
 
   .dashboard-actions .icon-button {
-    width: 100%;
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
   }
 
-  .dashboard-actions .icon-button:only-child {
-    grid-column: 1 / -1;
+  .dashboard-actions .icon-button span {
+    display: none;
   }
 
   .announcement-modal {
@@ -1902,14 +1951,50 @@ button:disabled {
     white-space: normal;
   }
 
-  .openai-status__header,
   .openai-status__footer {
     align-items: flex-start;
     flex-direction: column;
   }
 
+  .openai-status {
+    margin-bottom: 12px;
+  }
+
+  .openai-status__toggle {
+    min-height: 46px;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+
+  .openai-status__toggle:focus-visible {
+    outline: 2px solid var(--status-accent);
+    outline-offset: -3px;
+  }
+
+  .openai-status__brand,
   .openai-status__summary {
-    justify-content: flex-start;
+    display: none;
+  }
+
+  .openai-status__heading {
+    gap: 8px;
+  }
+
+  .openai-status__heading strong {
+    font-size: 14px;
+  }
+
+  .openai-status__chevron {
+    display: block;
+  }
+
+  .openai-status[data-expanded="true"] .openai-status__chevron {
+    transform: rotate(180deg);
+  }
+
+  .openai-status[data-expanded="false"] .openai-status__body {
+    display: none;
   }
 
   .reset-forecast__header,

@@ -474,7 +474,7 @@ export function StatusDashboard() {
   return (
     <main className="dashboard-shell">
       <header className="dashboard-header">
-        <div>
+        <div className="dashboard-title">
           <div className="eyebrow">
             <Eye size={15} aria-hidden />
             {t("app.eyebrow")}
@@ -630,26 +630,26 @@ export function StatusDashboard() {
               </option>
             ))}
           </select>
-        </div>
 
-        <div className="toolbar__status">
-          <label className="auto-refresh-control">
-            <input
-              type="checkbox"
-              checked={autoRefreshEnabled}
-              onChange={(event) => setAutoRefreshEnabled(event.target.checked)}
-              aria-label={t("refresh.auto")}
-            />
-            <span>{t("refresh.auto")}</span>
-            <strong>
-              {autoRefreshEnabled
-                ? `${t("refresh.nextIn")} ${formatRefreshCountdown(remainingSeconds, t)}`
-                : t("refresh.paused")}
-            </strong>
-          </label>
+          <div className="toolbar__settings">
+            <label className="auto-refresh-control">
+              <input
+                type="checkbox"
+                checked={autoRefreshEnabled}
+                onChange={(event) => setAutoRefreshEnabled(event.target.checked)}
+                aria-label={t("refresh.auto")}
+              />
+              <span>{t("refresh.auto")}</span>
+              <strong>
+                {autoRefreshEnabled
+                  ? `${t("refresh.nextIn")} ${formatRefreshCountdown(remainingSeconds, t)}`
+                  : t("refresh.paused")}
+              </strong>
+            </label>
 
-          <div className="toolbar__timestamp">
-            {t("common.updated")} {formatDateTime(data?.generatedAt ?? null, locale, t("common.unknown"), timeZone)}
+            <div className="toolbar__timestamp">
+              {t("common.updated")} {formatDateTime(data?.generatedAt ?? null, locale, t("common.unknown"), timeZone)}
+            </div>
           </div>
         </div>
       </section>

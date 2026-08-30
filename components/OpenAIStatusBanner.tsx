@@ -2,6 +2,7 @@
 
 import {
   CalendarClock,
+  ChevronDown,
   CircleAlert,
   CircleCheck,
   CloudOff,
@@ -9,6 +10,7 @@ import {
   OctagonAlert,
   TriangleAlert
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { formatDateTime } from "@/lib/format";
 import type { AppLocale, TFunction, TranslationKey } from "@/lib/i18n";
@@ -34,6 +36,8 @@ export function OpenAIStatusBanner({
   timeZone,
   t
 }: OpenAIStatusBannerProps) {
+  const [mobile, setMobile] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const indicator = data?.overall.indicator ?? "unknown";
   const incidents = data?.incidents ?? [];
   const StatusIcon = indicatorIcon(indicator);
@@ -41,34 +45,60 @@ export function OpenAIStatusBanner({
     ? t("openai.loading")
     : t(indicatorTitleKey(indicator));
 
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 620px)");
+    const syncLayout = () => {
+      setMobile(media.matches);
+      setExpanded(!media.matches);
+    };
+
+    syncLayout();
+    media.addEventListener("change", syncLayout);
+    return () => media.removeEventListener("change", syncLayout);
+  }, []);
+
   return (
     <section
       className="openai-status"
       data-indicator={indicator}
+      data-expanded={expanded ? "true" : "false"}
       aria-label={t("openai.label")}
       aria-live="polite"
     >
       <header className="openai-status__header">
-        <div className="openai-status__heading">
-          <StatusIcon size={18} strokeWidth={2.25} aria-hidden />
-          <div>
-            <span className="openai-status__brand">{t("openai.label")}</span>
-            <strong>{title}</strong>
+        <button
+          className="openai-status__toggle"
+          type="button"
+          disabled={!mobile}
+          aria-controls={mobile ? "openai-status-details" : undefined}
+          aria-expanded={mobile ? expanded : undefined}
+          aria-label={mobile ? t(expanded ? "openai.collapse" : "openai.expand") : undefined}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          <div className="openai-status__heading">
+            <StatusIcon size={18} strokeWidth={2.25} aria-hidden />
+            <div>
+              <span className="openai-status__brand">{t("openai.label")}</span>
+              <strong>{title}</strong>
+            </div>
           </div>
-        </div>
-        <div className="openai-status__summary">
-          {data?.stale ? (
-            <span className="openai-status__stale">{t("openai.stale")}</span>
-          ) : null}
-          {incidents.length > 0 ? (
-            <span>
-              {incidents.length} {t("openai.activeIncidents")}
-            </span>
-          ) : null}
-        </div>
+          <div className="openai-status__toggle-end">
+            <div className="openai-status__summary">
+              {data?.stale ? (
+                <span className="openai-status__stale">{t("openai.stale")}</span>
+              ) : null}
+              {incidents.length > 0 ? (
+                <span>
+                  {incidents.length} {t("openai.activeIncidents")}
+                </span>
+              ) : null}
+            </div>
+            <ChevronDown className="openai-status__chevron" size={18} aria-hidden />
+          </div>
+        </button>
       </header>
 
-      <div className="openai-status__body">
+      <div className="openai-status__body" id="openai-status-details">
         {loading && !data ? (
           <p className="openai-status__message">{t("openai.loadingDetail")}</p>
         ) : incidents.length > 0 ? (
