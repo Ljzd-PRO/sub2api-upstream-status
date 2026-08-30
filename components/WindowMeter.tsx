@@ -16,6 +16,8 @@ interface WindowMeterProps {
   t: TFunction;
 }
 
+const ELAPSED_DOT_STEP = 7.5;
+
 export function WindowMeter({
   window,
   planType,
@@ -34,6 +36,9 @@ export function WindowMeter({
     0,
     Math.min(100, recommendation.timeProgressUtilization ?? 0)
   );
+  const elapsedDotPositions = window.key === "7d"
+    ? getElapsedDotPositions(elapsedValue)
+    : [];
   const hasStats = window.stats !== null;
   const label = window.key === "5h" ? t("window.5h") : t("window.7d");
   const recommendationText = formatRecommendationText(recommendation, t);
@@ -67,12 +72,16 @@ export function WindowMeter({
           style={{ width: `${value}%` }}
           aria-hidden="true"
         />
-        {recommendation.timeProgressUtilization !== null ? (
-          <div
-            className="meter-track__elapsed"
-            style={{ width: `${elapsedValue}%` }}
-            aria-hidden="true"
-          />
+        {elapsedDotPositions.length > 0 ? (
+          <div className="meter-track__elapsed" aria-hidden="true">
+            {elapsedDotPositions.map((position, index) => (
+              <span
+                className={`meter-track__elapsed-dot${index === elapsedDotPositions.length - 1 ? " is-edge" : ""}`}
+                key={position}
+                style={{ left: `${position}%` }}
+              />
+            ))}
+          </div>
         ) : null}
       </div>
 
@@ -84,9 +93,13 @@ export function WindowMeter({
           {recommendationText}
         </small>
         <small>
-          {t(recommendation.forecastApplied
-            ? "window.recommendedForecastHelp"
-            : "window.recommendedHelp")}
+          {t(window.key === "7d"
+            ? recommendation.forecastApplied
+              ? "window.recommendedForecastHelp"
+              : "window.recommendedHelp"
+            : recommendation.forecastApplied
+              ? "window.recommendedForecastHelpShort"
+              : "window.recommendedHelpShort")}
         </small>
       </div>
 
@@ -104,6 +117,20 @@ export function WindowMeter({
       ) : null}
     </section>
   );
+}
+
+function getElapsedDotPositions(elapsedValue: number): number[] {
+  if (elapsedValue <= 0) return [];
+
+  const positions = [elapsedValue];
+  for (
+    let position = elapsedValue - ELAPSED_DOT_STEP;
+    position >= 0;
+    position -= ELAPSED_DOT_STEP
+  ) {
+    positions.unshift(Math.round(position * 10) / 10);
+  }
+  return positions;
 }
 
 function formatRecommendationText(
