@@ -141,7 +141,7 @@ describe("getCodexResetForecastConfig", () => {
   it("uses safe defaults for the public forecast sources", () => {
     expect(getCodexResetForecastConfig({ NODE_ENV: "test" })).toEqual({
       enabled: true,
-      sources: ["codex-runway", "codex-reset", "save-me-tibo", "codexreset-app"],
+      sources: ["codex-runway", "codex-reset", "save-me-tibo"],
       refreshIntervalSeconds: 120,
       requestTimeoutMs: 8000,
       maxAgeSeconds: 1800
@@ -193,7 +193,7 @@ describe("getCodexResetForecastConfig", () => {
       refreshIntervalSeconds: 120,
       requestTimeoutMs: 8000,
       maxAgeSeconds: 1800,
-      sources: ["codex-runway", "codex-reset", "save-me-tibo", "codexreset-app"]
+      sources: ["codex-runway", "codex-reset", "save-me-tibo"]
     });
   });
 });

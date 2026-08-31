@@ -46,17 +46,9 @@ describe("forecast source adapters", () => {
       now,
       1800
     );
-    const app = normalizeForecastSource(
-      "codexreset-app",
-      codexResetAppPayload(),
-      now,
-      1800
-    );
-
     expect(codexReset).toMatchObject({ probability24h: 0.4, probability48h: 0.6 });
     expect(saveMeTibo).toMatchObject({ probability24h: null, probability48h: 0.9 });
     expect(saveMeTibo.evidenceUrl).toBeNull();
-    expect(app).toMatchObject({ probability24h: 0.55, probability48h: 0.75 });
   });
 
   it("marks old, future-dated, and source-declared stale payloads unusable", () => {
@@ -86,12 +78,11 @@ describe("forecast source adapters", () => {
 });
 
 describe("aggregateForecastSources", () => {
-  it("weights fresh sources, deduplicates evidence, and excludes an incoherent reset history", () => {
+  it("weights fresh sources and deduplicates shared evidence", () => {
     const sources = [
       normalizeForecastSource("codex-runway", runwayPayload(), now, 1800),
       normalizeForecastSource("codex-reset", codexResetPayload(), now, 1800),
-      normalizeForecastSource("save-me-tibo", saveMeTiboPayload(), now, 1800),
-      normalizeForecastSource("codexreset-app", codexResetAppPayload(), now, 1800)
+      normalizeForecastSource("save-me-tibo", saveMeTiboPayload(), now, 1800)
     ];
     const payload = aggregateForecastSources(sources, now, {
       enabled: true,
@@ -105,10 +96,9 @@ describe("aggregateForecastSources", () => {
     expect(payload.agreement).toEqual({
       healthySources: 3,
       contributingSources: 3,
-      totalSources: 4,
+      totalSources: 3,
       independentEvidence: 2
     });
-    expect(payload.sources.find((source) => source.id === "codexreset-app")?.status).toBe("invalid");
   });
 
   it("uses an explicit event as a probability floor", () => {
@@ -401,24 +391,6 @@ function saveMeTiboPayload({
         what_changed: "A reset may happen soon.",
         receipts: [{ evidence_id: "receipt-1", url: receiptUrl }]
       }
-    }
-  };
-}
-
-function codexResetAppPayload() {
-  return {
-    generatedAt: "2026-08-29T23:59:00Z",
-    dataAsOf: "2026-08-29T23:55:00Z",
-    forecast: {
-      probability24h: 55,
-      probability48h: 75,
-      confidence: "high",
-      narrative: "Mixed community signals."
-    },
-    lastConfirmedReset: {
-      id: "old-reset",
-      timestamp: "2026-07-25T03:37:00Z",
-      sourceUrl: "https://x.com/thsottiaux"
     }
   };
 }

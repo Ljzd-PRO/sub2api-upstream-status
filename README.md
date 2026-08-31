@@ -53,7 +53,7 @@ Create `.env` from `.env.example`.
 - `OPENAI_STATUS_REFRESH_INTERVAL_SECONDS`: OpenAI Status polling and server cache interval, default `10`
 - `OPENAI_STATUS_REQUEST_TIMEOUT_MS`: OpenAI Status request timeout, default `8000`
 - `CODEX_RESET_FORECAST_ENABLED`: enable the community early-reset forecast, default `true`
-- `CODEX_RESET_FORECAST_SOURCES`: comma-separated source adapters; defaults to all four supported sources
+- `CODEX_RESET_FORECAST_SOURCES`: comma-separated source adapters; defaults to all three supported sources
 - `CODEX_RESET_FORECAST_REFRESH_INTERVAL_SECONDS`: browser polling and server cache interval, default `120` (range `30-3600`)
 - `CODEX_RESET_FORECAST_REQUEST_TIMEOUT_MS`: timeout for each forecast source, default `8000` (range `1000-30000`)
 - `CODEX_RESET_FORECAST_MAX_AGE_SECONDS`: maximum source age accepted for calculation, default `1800` (range `300-86400`)
@@ -63,7 +63,7 @@ The admin key is only read by the Next.js server route. It is not returned to th
 
 ## Early-reset Forecast
 
-The server cross-checks public JSON feeds from [Codex Runway](https://www.codexrunway.com/api/status.json), [Codex Reset](https://codex-reset.com/api/forecast), [SaveMeTibo](https://savemetibo.com/status.json), and [codexreset.app](https://codexreset.app/api/signal). Source freshness and reset-history consistency are validated before weighted probabilities are calculated. Repeated references to the same original post are deduplicated, and a source with an implausibly old last-reset record is excluded.
+The server cross-checks public JSON feeds from [Codex Runway](https://www.codexrunway.com/api/status.json), [Codex Reset](https://codex-reset.com/api/forecast), and [SaveMeTibo](https://savemetibo.com/status.json). Source freshness and reset-history consistency are validated before weighted probabilities are calculated. Repeated references to the same original post are deduplicated, and a source with an implausibly old last-reset record is excluded.
 
 Forecast requests are made only by this panel server. No sub2api URL, admin key, account name, or account usage is sent to a forecast provider. These are unofficial community estimates and are not an OpenAI commitment.
 

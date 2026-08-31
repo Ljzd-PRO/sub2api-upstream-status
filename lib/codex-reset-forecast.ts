@@ -83,12 +83,6 @@ const SOURCE_DEFINITIONS: Record<CodexResetForecastSourceId, SourceDefinition> =
     label: "SaveMeTibo",
     url: "https://savemetibo.com/status.json",
     weight: 0.3
-  },
-  "codexreset-app": {
-    id: "codexreset-app",
-    label: "codexreset.app",
-    url: "https://codexreset.app/api/signal",
-    weight: 0.1
   }
 };
 
@@ -101,8 +95,6 @@ const ALLOWED_EVIDENCE_HOSTS = new Set([
   "www.codex-reset.com",
   "savemetibo.com",
   "www.savemetibo.com",
-  "codexreset.app",
-  "www.codexreset.app",
   "github.com",
   "status.openai.com"
 ]);
@@ -196,8 +188,6 @@ export function normalizeForecastSource(
         return normalizeCodexReset(payload);
       case "save-me-tibo":
         return normalizeSaveMeTibo(payload);
-      case "codexreset-app":
-        return normalizeCodexResetApp(payload);
     }
   })();
 
@@ -494,35 +484,6 @@ function normalizeSaveMeTibo(payload: unknown): NormalizedForecastSource {
     detail: cleanText(provider?.what_changed) || "Community reset watch.",
     evidenceUrl,
     evidenceKey: evidenceKey(receipts[0]?.evidence_id, evidenceUrl, null, null)
-  };
-}
-
-function normalizeCodexResetApp(payload: unknown): NormalizedForecastSource {
-  const definition = SOURCE_DEFINITIONS["codexreset-app"];
-  const record = asRecord(payload);
-  const forecast = asRecord(record?.forecast);
-  const lastReset = asRecord(record?.lastConfirmedReset);
-  const updatedAtMs = dateValue(record?.dataAsOf ?? record?.generatedAt);
-  const evidenceUrl = safeEvidenceUrl(lastReset?.sourceUrl, definition.url);
-
-  return {
-    id: definition.id,
-    label: definition.label,
-    weight: definition.weight,
-    status: !record || !forecast ? "invalid" : "ok",
-    updatedAt: isoDate(updatedAtMs),
-    updatedAtMs,
-    lastResetAtMs: dateValue(lastReset?.timestamp),
-    probability24h: percentProbability(forecast?.probability24h),
-    probability48h: percentProbability(forecast?.probability48h),
-    eventAt: null,
-    event: null,
-    explicitFloor24h: null,
-    explicitFloor48h: null,
-    confidence: confidenceValue(forecast?.confidence),
-    detail: cleanText(forecast?.narrative) || "Community reset forecast.",
-    evidenceUrl,
-    evidenceKey: evidenceKey(lastReset?.id, evidenceUrl, null, null)
   };
 }
 

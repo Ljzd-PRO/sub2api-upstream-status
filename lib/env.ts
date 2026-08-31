@@ -47,8 +47,7 @@ const DEFAULT_USAGE_WINDOWS: UsageWindowKey[] = ["5h", "7d"];
 export const CODEX_RESET_FORECAST_SOURCE_IDS: CodexResetForecastSourceId[] = [
   "codex-runway",
   "codex-reset",
-  "save-me-tibo",
-  "codexreset-app"
+  "save-me-tibo"
 ];
 
 export function parseAccountIds(value: string | undefined): number[] {

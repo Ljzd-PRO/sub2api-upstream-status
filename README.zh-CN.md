@@ -53,7 +53,7 @@ ScriptWidget 小组件包位于 [`scriptwidget/sub2api-upstream-status`](scriptw
 - `OPENAI_STATUS_REFRESH_INTERVAL_SECONDS`：OpenAI 状态轮询及服务端缓存间隔，默认 `10`
 - `OPENAI_STATUS_REQUEST_TIMEOUT_MS`：OpenAI 状态请求超时时间，默认 `8000`
 - `CODEX_RESET_FORECAST_ENABLED`：是否启用社区提前重置预测，默认 `true`
-- `CODEX_RESET_FORECAST_SOURCES`：以逗号分隔的预测源适配器，默认启用全部四个来源
+- `CODEX_RESET_FORECAST_SOURCES`：以逗号分隔的预测源适配器，默认启用全部三个来源
 - `CODEX_RESET_FORECAST_REFRESH_INTERVAL_SECONDS`：浏览器轮询及服务端缓存间隔，默认 `120`，范围 `30-3600`
 - `CODEX_RESET_FORECAST_REQUEST_TIMEOUT_MS`：每个预测来源的请求超时，默认 `8000`，范围 `1000-30000`
 - `CODEX_RESET_FORECAST_MAX_AGE_SECONDS`：允许参与计算的来源最大数据年龄，默认 `1800`，范围 `300-86400`
@@ -63,7 +63,7 @@ admin key 只在 Next.js 服务端路由中读取，不会返回给浏览器。
 
 ## 提前重置预测
 
-面板服务端交叉读取 [Codex Runway](https://www.codexrunway.com/api/status.json)、[Codex Reset](https://codex-reset.com/api/forecast)、[SaveMeTibo](https://savemetibo.com/status.json) 和 [codexreset.app](https://codexreset.app/api/signal) 的公开 JSON 数据。计算前会检查数据时效、来源声明状态和最近重置时间的一致性；多个站点引用同一条原始帖子时只视为一条独立证据，最近重置记录明显落后的来源会被剔除。
+面板服务端交叉读取 [Codex Runway](https://www.codexrunway.com/api/status.json)、[Codex Reset](https://codex-reset.com/api/forecast) 和 [SaveMeTibo](https://savemetibo.com/status.json) 的公开 JSON 数据。计算前会检查数据时效、来源声明状态和最近重置时间的一致性；多个站点引用同一条原始帖子时只视为一条独立证据，最近重置记录明显落后的来源会被剔除。
 
 预测请求只由本面板服务端发起，不会向预测网站发送 sub2api 地址、admin key、账号名或账号用量。预测属于非官方社区估算，不代表 OpenAI 的承诺。
 

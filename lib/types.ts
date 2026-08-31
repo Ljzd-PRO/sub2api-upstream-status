@@ -5,8 +5,7 @@ export type UsageWindowKey = "5h" | "7d";
 export type CodexResetForecastSourceId =
   | "codex-runway"
   | "codex-reset"
-  | "save-me-tibo"
-  | "codexreset-app";
+  | "save-me-tibo";
 export type CodexResetForecastState =
   | "unavailable"
   | "baseline"
