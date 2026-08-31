@@ -81,6 +81,10 @@ export function WindowMeter({
                 style={{ left: `${position}%` }}
               />
             ))}
+            <span
+              className="meter-track__elapsed-marker"
+              style={{ left: `${elapsedValue}%` }}
+            />
           </div>
         ) : null}
       </div>
@@ -91,15 +95,6 @@ export function WindowMeter({
         </span>
         <small className="window-meter__recommendation-text">
           {recommendationText}
-        </small>
-        <small>
-          {t(window.key === "7d"
-            ? recommendation.forecastApplied
-              ? "window.recommendedForecastHelp"
-              : "window.recommendedHelp"
-            : recommendation.forecastApplied
-              ? "window.recommendedForecastHelpShort"
-              : "window.recommendedHelpShort")}
         </small>
       </div>
 

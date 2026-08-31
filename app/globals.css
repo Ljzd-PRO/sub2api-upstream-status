@@ -1428,6 +1428,10 @@ button:disabled {
   background: #e5eaf0;
 }
 
+.window-meter .meter-track {
+  overflow: visible;
+}
+
 .meter-track__recommended,
 .meter-track__fill {
   position: absolute;
@@ -1472,6 +1476,17 @@ button:disabled {
   height: 5px;
   background: rgb(255 255 255 / 98%);
   box-shadow: 0 0 0 1px rgb(15 23 42 / 20%);
+}
+
+.meter-track__elapsed-marker {
+  position: absolute;
+  top: calc(100% + 3px);
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-right: 4px solid transparent;
+  border-bottom: 5px solid #94a3b8;
+  border-left: 4px solid transparent;
 }
 
 .concurrency-meter[data-state="warning"] .meter-track__fill,
