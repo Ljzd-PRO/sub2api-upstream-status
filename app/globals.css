@@ -1630,6 +1630,13 @@ button:disabled {
   font-size: 11px !important;
 }
 
+.window-meter__recommendation-text strong {
+  color: var(--text);
+  font-size: inherit;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .meter-track__recommended,
   .meter-track__fill {

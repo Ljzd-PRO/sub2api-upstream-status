@@ -94,7 +94,7 @@ export function WindowMeter({
           {t("window.recommended")} {formatPercent(recommendation.recommendedUtilization, t("common.noData"))}
         </span>
         <small className="window-meter__recommendation-text">
-          {recommendationText}
+          {highlightPercentages(recommendationText)}
         </small>
       </div>
 
@@ -111,6 +111,14 @@ export function WindowMeter({
         </div>
       ) : null}
     </section>
+  );
+}
+
+function highlightPercentages(text: string) {
+  return text.split(/(\d+(?:\.\d+)?%)/g).map((part, index) =>
+    /^\d+(?:\.\d+)?%$/.test(part) ? (
+      <strong key={`${index}-${part}`}>{part}</strong>
+    ) : part
   );
 }
 
