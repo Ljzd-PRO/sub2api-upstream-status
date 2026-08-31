@@ -1309,6 +1309,11 @@ button:disabled {
   text-overflow: ellipsis;
 }
 
+.plan-badge[data-plan="pro"] {
+  color: #6b21a8;
+  background: #f3e8ff;
+}
+
 .health-pill {
   flex: 0 0 auto;
   border: 1px solid transparent;

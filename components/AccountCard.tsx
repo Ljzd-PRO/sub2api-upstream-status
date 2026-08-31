@@ -47,7 +47,11 @@ export function AccountCard({
         <div className="account-card__title">
           <div className="account-card__badges">
             <span className="platform-badge">{platformLabel(account.platform)}</span>
-            <span className="plan-badge" title={planLabel}>
+            <span
+              className="plan-badge"
+              data-plan={account.planType ?? "unknown"}
+              title={planLabel}
+            >
               {planLabel}
             </span>
           </div>
