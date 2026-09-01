@@ -29,6 +29,7 @@ Public read-only Next.js panel for selected sub2api upstream account usage windo
 - Frontend auto refresh countdown with a per-browser pause switch
 - Automatic language detection with Simplified Chinese, English, and Traditional Chinese
 - Automatic time zone detection with a per-browser manual time zone selector
+- Automatic light/dark theme detection with a per-browser manual theme selector
 - Optional account name masking in the public API and UI
 
 ## Scriptable Widget

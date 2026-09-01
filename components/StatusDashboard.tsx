@@ -18,6 +18,7 @@ import { AccountCard } from "@/components/AccountCard";
 import { AnnouncementModal } from "@/components/AnnouncementModal";
 import { CodexResetForecastBanner } from "@/components/CodexResetForecastBanner";
 import { OpenAIStatusBanner } from "@/components/OpenAIStatusBanner";
+import { ThemeMenu } from "@/components/ThemeMenu";
 import { formatCompactNumber, formatDateTime, platformLabel } from "@/lib/format";
 import { appLocales, useI18n, type AppLocale, type LocaleChoice } from "@/lib/i18n";
 import {
@@ -482,6 +483,7 @@ export function StatusDashboard() {
           <h1>{title}</h1>
         </div>
         <div className="dashboard-actions">
+          <ThemeMenu t={t} />
           {announcementStatus?.enabled === true ? (
             <button
               className="icon-button announcement-button"

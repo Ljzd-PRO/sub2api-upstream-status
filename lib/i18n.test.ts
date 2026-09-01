@@ -39,6 +39,9 @@ describe("translate", () => {
     expect(translate("en", "openai.label")).toBe("Upstream OpenAI status");
     expect(translate("en", "openai.status.monitoring")).toBe("Monitoring");
     expect(translate("zh-CN", "filters.show")).toBe("展开筛选与设置");
+    expect(translate("zh-CN", "theme.auto")).toBe("跟随系统");
+    expect(translate("zh-TW", "theme.light")).toBe("淺色");
+    expect(translate("en", "theme.dark")).toBe("Dark");
     expect(translate("zh-TW", "filters.hide")).toBe("收起篩選與設定");
     expect(translate("en", "filters.show")).toBe("Show filters & settings");
     expect(translate("zh-CN", "openai.expand")).toBe("展开 OpenAI 状态详情");
