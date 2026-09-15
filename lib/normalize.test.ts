@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseAccountIds } from "@/lib/env";
+import { computeForecastRecommendation } from "@/lib/codex-reset-recommendation";
 import {
   buildOpenAIUsageFromExtra,
   buildSummary,
@@ -10,7 +11,7 @@ import {
   shouldFetchActiveUsage,
   shouldFetchPassiveUsage
 } from "@/lib/normalize";
-import type { Sub2APIAccount } from "@/lib/types";
+import type { CodexResetForecastPayload, Sub2APIAccount } from "@/lib/types";
 
 const now = new Date("2026-03-16T12:00:00Z");
 
@@ -153,6 +154,65 @@ describe("normalizeAccount", () => {
     expect(status.planType).toBe("pro");
   });
 
+  it("falls back to cached account quota metadata when the live quota query fails", () => {
+    const account = baseAccount({
+      credentials: { plan_type: "ChatGPT_Pro" },
+      extra: {
+        codex_reset_credit_snapshot: { available_count: "3" }
+      }
+    });
+    const status = normalizeAccount(account, null, null, now, null, null);
+
+    expect(status.planType).toBe("pro");
+    expect(status.resetCredits).toEqual({
+      supported: true,
+      availableCount: 3
+    });
+  });
+
+  it("keeps forecast weighting active when the plan comes from account metadata", () => {
+    const account = baseAccount({
+      credentials: { plan_type: "pro" },
+      extra: {
+        codex_7d_used_percent: 48,
+        codex_7d_reset_at: "2026-03-20T12:00:00Z"
+      }
+    });
+    const status = normalizeAccount(
+      account,
+      buildOpenAIUsageFromExtra(account, now),
+      null,
+      now
+    );
+    const recommendation = computeForecastRecommendation(
+      status.windows.sevenDay,
+      status.planType,
+      resetForecast(),
+      now.getTime()
+    );
+
+    expect(recommendation.forecastApplied).toBe(true);
+    expect(recommendation.recommendedUtilization).toBeGreaterThan(
+      recommendation.timeProgressUtilization ?? 0
+    );
+  });
+
+  it("prefers a fresh quota response over cached account quota metadata", () => {
+    const account = baseAccount({
+      credentials: { plan_type: "plus" },
+      extra: {
+        codex_reset_credit_snapshot: { available_count: 3 }
+      }
+    });
+    const status = normalizeAccount(account, null, null, now, null, {
+      plan_type: "pro",
+      rate_limit_reset_credits: { available_count: 1 }
+    });
+
+    expect(status.planType).toBe("pro");
+    expect(status.resetCredits.availableCount).toBe(1);
+  });
+
   it("keeps reset credits supported when the quota query has no data", () => {
     expect(normalizeResetCredits(baseAccount(), null)).toEqual({
       supported: true,
@@ -289,6 +349,32 @@ describe("normalizeAccount", () => {
     });
   });
 });
+
+function resetForecast(): CodexResetForecastPayload {
+  return {
+    enabled: true,
+    fetchedAt: now.toISOString(),
+    refreshIntervalSeconds: 120,
+    stale: false,
+    state: "possible",
+    probability24h: 0.24,
+    probability48h: 0.42,
+    confidence: "low",
+    expectedWindow: {
+      startAt: "2026-03-17T12:00:00Z",
+      endAt: "2026-03-18T12:00:00Z",
+      precision: "horizon"
+    },
+    scope: { plans: ["all"], windows: ["7d"], uncertain: true },
+    agreement: {
+      healthySources: 3,
+      contributingSources: 1,
+      totalSources: 3,
+      independentEvidence: 1
+    },
+    sources: []
+  };
+}
 
 describe("normalizePlanType", () => {
   it("normalizes known and future plan names without retaining control characters", () => {

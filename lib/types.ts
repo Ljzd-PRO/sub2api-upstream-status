@@ -21,6 +21,7 @@ export interface Sub2APIAccount {
   notes?: string | null;
   platform: string;
   type: string;
+  credentials?: Record<string, unknown> | null;
   extra?: Record<string, unknown> | null;
   concurrency?: number;
   priority?: number;

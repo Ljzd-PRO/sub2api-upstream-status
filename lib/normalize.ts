@@ -74,7 +74,7 @@ export function normalizeAccount(
     name: account.name || `Account ${account.id}`,
     platform: account.platform,
     type: account.type,
-    planType: normalizePlanType(openAIQuota?.plan_type),
+    planType: normalizeAccountPlanType(account, openAIQuota),
     status: account.status,
     schedulable: Boolean(account.schedulable),
     health,
@@ -103,11 +103,27 @@ export function normalizeResetCredits(
     return { supported: false, availableCount: null };
   }
 
-  const count = numberFromUnknown(quota?.rate_limit_reset_credits?.available_count);
+  const cachedSnapshot = recordFromUnknown(account.extra?.codex_reset_credit_snapshot);
+  const count = integerFromFirst(
+    quota?.rate_limit_reset_credits?.available_count,
+    cachedSnapshot?.available_count
+  );
   return {
     supported: true,
-    availableCount: count == null ? null : Math.max(0, Math.floor(count))
+    availableCount: count == null ? null : Math.max(0, count)
   };
+}
+
+function normalizeAccountPlanType(
+  account: Sub2APIAccount,
+  quota: Sub2APIOpenAIQuotaUsage | null
+): string | null {
+  return (
+    normalizePlanType(quota?.plan_type) ??
+    normalizePlanType(account.credentials?.plan_type) ??
+    normalizePlanType(account.extra?.plan_type) ??
+    normalizePlanType(account.extra?.chatgpt_plan_type)
+  );
 }
 
 export function normalizePlanType(value: unknown): string | null {
@@ -462,6 +478,12 @@ function numberFromUnknown(value: unknown): number | null {
     if (Number.isFinite(parsed)) return parsed;
   }
   return null;
+}
+
+function recordFromUnknown(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
 }
 
 function integerFromFirst(...values: unknown[]): number | null {
