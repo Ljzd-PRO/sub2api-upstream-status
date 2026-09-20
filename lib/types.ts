@@ -73,6 +73,9 @@ export interface Sub2APIUsageInfo {
 
 export interface Sub2APIRateLimitResetCredits {
   available_count?: number;
+  credits?: Array<{
+    expires_at?: string | number | null;
+  }>;
 }
 
 export interface Sub2APIOpenAIQuotaUsage {
@@ -156,6 +159,7 @@ export interface PanelConcurrency {
 export interface PanelResetCredits {
   supported: boolean;
   availableCount: number | null;
+  nearestExpiresAt: string | null;
 }
 
 export interface PanelUsageWindow {

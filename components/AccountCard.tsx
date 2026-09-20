@@ -3,6 +3,7 @@
 import {
   AlertTriangle,
   Ban,
+  CalendarClock,
   CheckCircle2,
   CircleOff,
   Gauge,
@@ -75,7 +76,13 @@ export function AccountCard({
       ) : null}
 
       {account.resetCredits.supported ? (
-        <ResetCreditsCount availableCount={account.resetCredits.availableCount} t={t} />
+        <ResetCreditsCount
+          availableCount={account.resetCredits.availableCount}
+          nearestExpiresAt={account.resetCredits.nearestExpiresAt}
+          locale={locale}
+          timeZone={timeZone}
+          t={t}
+        />
       ) : null}
 
       <div className="window-list">
@@ -147,27 +154,46 @@ function planTypeLabel(planType: string | null, t: TFunction): string {
 
 function ResetCreditsCount({
   availableCount,
+  nearestExpiresAt,
+  locale,
+  timeZone,
   t
 }: {
   availableCount: number | null;
+  nearestExpiresAt: string | null;
+  locale: AppLocale;
+  timeZone: string;
   t: TFunction;
 }) {
   const state = availableCount == null ? "unknown" : availableCount > 0 ? "available" : "empty";
 
   return (
     <section className="reset-credits" data-state={state}>
-      <div className="reset-credits__label">
-        <RotateCcw size={16} aria-hidden />
-        <div>
+      <div className="reset-credits__top">
+        <div className="reset-credits__label">
+          <RotateCcw size={16} aria-hidden />
           <span>{t("account.resetCredits")}</span>
-          <small>{t("account.resetCreditsHelp")}</small>
+        </div>
+        <strong>
+          {availableCount == null
+            ? t("common.noData")
+            : `${availableCount} ${t("account.resetCreditsUnit")}`}
+        </strong>
+      </div>
+      <div className="reset-credits__details">
+        <small className="reset-credits__help">{t("account.resetCreditsHelp")}</small>
+        <div className="reset-credits__expiry">
+          <CalendarClock size={14} aria-hidden />
+          <span>{t("account.resetCreditsNearestExpiry")}</span>
+          {nearestExpiresAt ? (
+            <time dateTime={nearestExpiresAt}>
+              {formatDateTime(nearestExpiresAt, locale, t("common.noData"), timeZone)}
+            </time>
+          ) : (
+            <span className="reset-credits__expiry-value">{t("common.noData")}</span>
+          )}
         </div>
       </div>
-      <strong>
-        {availableCount == null
-          ? t("common.noData")
-          : `${availableCount} ${t("account.resetCreditsUnit")}`}
-      </strong>
     </section>
   );
 }

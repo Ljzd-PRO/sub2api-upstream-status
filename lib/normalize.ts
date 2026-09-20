@@ -84,7 +84,7 @@ export function normalizeAccount(
     updatedAt: usage?.updated_at || account.updated_at || null,
     rateLimitResetAt: account.rate_limit_reset_at || null,
     concurrency: normalizeConcurrency(account),
-    resetCredits: normalizeResetCredits(account, openAIQuota),
+    resetCredits: normalizeResetCredits(account, openAIQuota, now),
     windows: {
       fiveHour,
       sevenDay
@@ -96,22 +96,46 @@ export function normalizeAccount(
 
 export function normalizeResetCredits(
   account: Sub2APIAccount,
-  quota: Sub2APIOpenAIQuotaUsage | null
+  quota: Sub2APIOpenAIQuotaUsage | null,
+  now = new Date()
 ): PanelResetCredits {
   const supported = shouldFetchActiveUsage(account);
   if (!supported) {
-    return { supported: false, availableCount: null };
+    return { supported: false, availableCount: null, nearestExpiresAt: null };
   }
 
   const cachedSnapshot = recordFromUnknown(account.extra?.codex_reset_credit_snapshot);
+  const liveCredits = quota?.rate_limit_reset_credits;
   const count = integerFromFirst(
-    quota?.rate_limit_reset_credits?.available_count,
+    liveCredits?.available_count,
     cachedSnapshot?.available_count
   );
+  const availableCount = count == null ? null : Math.max(0, count);
+  const credits = Array.isArray(liveCredits?.credits)
+    ? liveCredits.credits
+    : cachedSnapshot?.credits;
+
   return {
     supported: true,
-    availableCount: count == null ? null : Math.max(0, count)
+    availableCount,
+    nearestExpiresAt: availableCount && availableCount > 0
+      ? nearestFutureExpiration(credits, now)
+      : null
   };
+}
+
+function nearestFutureExpiration(value: unknown, now: Date): string | null {
+  if (!Array.isArray(value)) return null;
+
+  let nearest: Date | null = null;
+  for (const item of value) {
+    const credit = recordFromUnknown(item);
+    const expiresAt = parseDateLike(credit?.expires_at);
+    if (!expiresAt || expiresAt.getTime() <= now.getTime()) continue;
+    if (!nearest || expiresAt.getTime() < nearest.getTime()) nearest = expiresAt;
+  }
+
+  return nearest?.toISOString() ?? null;
 }
 
 function normalizeAccountPlanType(

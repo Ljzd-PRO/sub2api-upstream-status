@@ -133,11 +133,20 @@ describe("normalizeAccount", () => {
   it("normalizes available OpenAI reset credits", () => {
     expect(
       normalizeResetCredits(baseAccount(), {
-        rate_limit_reset_credits: { available_count: 3 }
-      })
+        rate_limit_reset_credits: {
+          available_count: 3,
+          credits: [
+            { expires_at: "2026-03-22T12:00:00Z" },
+            { expires_at: "invalid" },
+            { expires_at: "2026-03-15T12:00:00Z" },
+            { expires_at: "2026-03-18T12:00:00Z" }
+          ]
+        }
+      }, now)
     ).toEqual({
       supported: true,
-      availableCount: 3
+      availableCount: 3,
+      nearestExpiresAt: "2026-03-18T12:00:00.000Z"
     });
   });
 
@@ -158,7 +167,10 @@ describe("normalizeAccount", () => {
     const account = baseAccount({
       credentials: { plan_type: "ChatGPT_Pro" },
       extra: {
-        codex_reset_credit_snapshot: { available_count: "3" }
+        codex_reset_credit_snapshot: {
+          available_count: "3",
+          credits: [{ expires_at: "2026-03-20T08:30:00Z" }]
+        }
       }
     });
     const status = normalizeAccount(account, null, null, now, null, null);
@@ -166,7 +178,8 @@ describe("normalizeAccount", () => {
     expect(status.planType).toBe("pro");
     expect(status.resetCredits).toEqual({
       supported: true,
-      availableCount: 3
+      availableCount: 3,
+      nearestExpiresAt: "2026-03-20T08:30:00.000Z"
     });
   });
 
@@ -201,22 +214,50 @@ describe("normalizeAccount", () => {
     const account = baseAccount({
       credentials: { plan_type: "plus" },
       extra: {
-        codex_reset_credit_snapshot: { available_count: 3 }
+        codex_reset_credit_snapshot: {
+          available_count: 3,
+          credits: [{ expires_at: "2026-03-17T12:00:00Z" }]
+        }
       }
     });
     const status = normalizeAccount(account, null, null, now, null, {
       plan_type: "pro",
-      rate_limit_reset_credits: { available_count: 1 }
+      rate_limit_reset_credits: {
+        available_count: 1,
+        credits: [{ expires_at: "2026-03-19T12:00:00Z" }]
+      }
     });
 
     expect(status.planType).toBe("pro");
     expect(status.resetCredits.availableCount).toBe(1);
+    expect(status.resetCredits.nearestExpiresAt).toBe("2026-03-19T12:00:00.000Z");
+  });
+
+  it("does not expose a cached expiry after the live reset count reaches zero", () => {
+    const account = baseAccount({
+      extra: {
+        codex_reset_credit_snapshot: {
+          available_count: 1,
+          credits: [{ expires_at: "2026-03-20T12:00:00Z" }]
+        }
+      }
+    });
+    const status = normalizeAccount(account, null, null, now, null, {
+      rate_limit_reset_credits: { available_count: 0, credits: [] }
+    });
+
+    expect(status.resetCredits).toEqual({
+      supported: true,
+      availableCount: 0,
+      nearestExpiresAt: null
+    });
   });
 
   it("keeps reset credits supported when the quota query has no data", () => {
     expect(normalizeResetCredits(baseAccount(), null)).toEqual({
       supported: true,
-      availableCount: null
+      availableCount: null,
+      nearestExpiresAt: null
     });
   });
 
@@ -227,7 +268,8 @@ describe("normalizeAccount", () => {
       })
     ).toEqual({
       supported: false,
-      availableCount: null
+      availableCount: null,
+      nearestExpiresAt: null
     });
   });
 

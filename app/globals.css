@@ -1618,11 +1618,9 @@ button:disabled {
 }
 
 .reset-credits {
-  display: flex;
+  display: grid;
   min-width: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  gap: 8px;
   margin: 0 0 18px;
   padding: 10px 12px;
   border: 1px solid #bfdbfe;
@@ -1630,8 +1628,16 @@ button:disabled {
   background: #eff6ff;
 }
 
-.reset-credits__label {
+.reset-credits__top {
   display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reset-credits__label {
+  display: inline-flex;
   min-width: 0;
   align-items: center;
   gap: 9px;
@@ -1642,26 +1648,48 @@ button:disabled {
   flex: 0 0 auto;
 }
 
-.reset-credits__label div {
-  min-width: 0;
-}
-
-.reset-credits__label span,
-.reset-credits__label small {
-  display: block;
-}
-
 .reset-credits__label span {
   color: var(--text);
   font-size: 13px;
   font-weight: 740;
 }
 
-.reset-credits__label small {
-  margin-top: 2px;
+.reset-credits__details {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 14px;
+  padding-top: 7px;
+  border-top: 1px solid rgb(29 78 216 / 12%);
+}
+
+.reset-credits__help {
+  min-width: 0;
   color: var(--muted);
   font-size: 11px;
   line-height: 1.35;
+}
+
+.reset-credits__expiry {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.reset-credits__expiry svg {
+  flex: 0 0 auto;
+}
+
+.reset-credits__expiry time,
+.reset-credits__expiry-value {
+  color: var(--muted-strong);
+  font-weight: 700;
 }
 
 .reset-credits strong {
@@ -2130,6 +2158,14 @@ button:disabled {
   color: #9be7ad;
 }
 
+:root[data-theme="dark"] .reset-credits__details {
+  border-top-color: rgb(138 180 255 / 18%);
+}
+
+:root[data-theme="dark"] .reset-credits[data-state="available"] .reset-credits__details {
+  border-top-color: rgb(155 231 173 / 18%);
+}
+
 :root[data-theme="dark"] .window-meter__recommendation span {
   color: #83d69b;
 }
@@ -2522,6 +2558,27 @@ button:disabled {
     overflow-wrap: anywhere;
     text-overflow: clip;
     white-space: normal;
+  }
+
+  .reset-credits__details {
+    display: block;
+  }
+
+  .reset-credits__help {
+    display: none;
+  }
+
+  .reset-credits__expiry {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-content: flex-start;
+    white-space: normal;
+  }
+
+  .reset-credits__expiry time,
+  .reset-credits__expiry-value {
+    grid-column: 2;
+    text-align: left;
   }
 
   .window-meter__stats {
