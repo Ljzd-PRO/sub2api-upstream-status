@@ -401,6 +401,7 @@ function resetForecast(): CodexResetForecastPayload {
     state: "possible",
     probability24h: 0.24,
     probability48h: 0.42,
+    lastResetAt: null,
     confidence: "low",
     expectedWindow: {
       startAt: "2026-03-17T12:00:00Z",

@@ -1,7 +1,4 @@
-import type {
-  CodexResetForecastSourceId,
-  UsageWindowKey
-} from "@/lib/types";
+import type { UsageWindowKey } from "@/lib/types";
 
 export class ConfigError extends Error {
   constructor(message: string) {
@@ -29,7 +26,6 @@ export interface OpenAIStatusConfig {
 
 export interface CodexResetForecastConfig {
   enabled: boolean;
-  sources: CodexResetForecastSourceId[];
   refreshIntervalSeconds: number;
   requestTimeoutMs: number;
   maxAgeSeconds: number;
@@ -44,11 +40,6 @@ const DEFAULT_CODEX_RESET_FORECAST_REFRESH_SECONDS = 120;
 const DEFAULT_CODEX_RESET_FORECAST_TIMEOUT_MS = 8000;
 const DEFAULT_CODEX_RESET_FORECAST_MAX_AGE_SECONDS = 1800;
 const DEFAULT_USAGE_WINDOWS: UsageWindowKey[] = ["5h", "7d"];
-export const CODEX_RESET_FORECAST_SOURCE_IDS: CodexResetForecastSourceId[] = [
-  "codex-runway",
-  "codex-reset",
-  "save-me-tibo"
-];
 
 export function parseAccountIds(value: string | undefined): number[] {
   if (!value) return [];
@@ -119,23 +110,6 @@ export function parseUsageWindows(value: string | undefined): UsageWindowKey[] {
   return windows.length > 0 ? windows : [...DEFAULT_USAGE_WINDOWS];
 }
 
-export function parseCodexResetForecastSources(
-  value: string | undefined
-): CodexResetForecastSourceId[] {
-  if (!value?.trim()) return [...CODEX_RESET_FORECAST_SOURCE_IDS];
-
-  const requested = new Set(
-    value
-      .toLowerCase()
-      .split(/[\s,]+/)
-      .map((item) => item.trim())
-      .filter(Boolean)
-  );
-  const sources = CODEX_RESET_FORECAST_SOURCE_IDS.filter((source) => requested.has(source));
-
-  return sources.length > 0 ? sources : [...CODEX_RESET_FORECAST_SOURCE_IDS];
-}
-
 export function getServerConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const apiBaseUrl = normalizeApiBaseUrl(env.SUB2API_BASE_URL);
   const adminApiKey = env.SUB2API_ADMIN_API_KEY?.trim() ?? "";
@@ -197,7 +171,6 @@ export function getCodexResetForecastConfig(
 ): CodexResetForecastConfig {
   return {
     enabled: parseBooleanFlag(env.CODEX_RESET_FORECAST_ENABLED, true),
-    sources: parseCodexResetForecastSources(env.CODEX_RESET_FORECAST_SOURCES),
     refreshIntervalSeconds: parsePositiveInteger(
       env.CODEX_RESET_FORECAST_REFRESH_INTERVAL_SECONDS,
       DEFAULT_CODEX_RESET_FORECAST_REFRESH_SECONDS,

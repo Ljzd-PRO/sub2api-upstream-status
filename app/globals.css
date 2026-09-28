@@ -1085,26 +1085,46 @@ button:disabled {
   line-height: 1.3;
 }
 
-.reset-forecast__badges {
+.reset-forecast__actions {
   display: flex;
   flex: 0 0 auto;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
-  gap: 7px;
+  gap: 8px;
 }
 
-.reset-forecast__badges span {
-  padding: 4px 8px;
-  border: 1px solid rgba(24, 33, 43, 0.12);
-  border-radius: 999px;
+.reset-forecast__stale {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--muted-strong);
-  background: rgba(255, 255, 255, 0.68);
   font-size: 11px;
-  font-weight: 720;
+  font-weight: 700;
 }
 
-.reset-forecast__unofficial {
-  color: #475569;
+.reset-forecast__site-link {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--link);
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.reset-forecast__site-link:hover {
+  border-color: var(--forecast-accent);
+}
+
+.reset-forecast__site-link-short {
+  display: none;
 }
 
 .reset-forecast__body {
@@ -1122,11 +1142,9 @@ button:disabled {
 .reset-forecast__metrics {
   display: grid;
   grid-template-columns:
-    minmax(100px, 0.55fr)
-    minmax(100px, 0.55fr)
-    minmax(250px, 1.5fr)
-    minmax(100px, 0.55fr)
-    minmax(100px, 0.55fr);
+    minmax(100px, 0.65fr)
+    minmax(100px, 0.65fr)
+    minmax(210px, 1.5fr);
   padding: 12px 0;
 }
 
@@ -2023,14 +2041,12 @@ button:disabled {
   --status-header: #1d304b;
 }
 
-:root[data-theme="dark"] .openai-status__summary span,
-:root[data-theme="dark"] .reset-forecast__badges span {
+:root[data-theme="dark"] .openai-status__summary span {
   border-color: rgba(255, 255, 255, 0.16);
   background: rgba(0, 0, 0, 0.16);
 }
 
-:root[data-theme="dark"] .openai-status__stale,
-:root[data-theme="dark"] .reset-forecast__unofficial {
+:root[data-theme="dark"] .openai-status__stale {
   color: #c3cbd1;
 }
 
@@ -2475,14 +2491,47 @@ button:disabled {
     display: none;
   }
 
-  .reset-forecast__header,
   .reset-forecast__footer {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .reset-forecast__badges {
-    justify-content: flex-start;
+  .reset-forecast__header {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .reset-forecast__heading {
+    flex: 1 1 auto;
+  }
+
+  .reset-forecast__heading > svg {
+    width: 16px;
+  }
+
+  .reset-forecast__actions {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  .reset-forecast__stale {
+    flex: 0 0 auto;
+  }
+
+  .reset-forecast__stale span {
+    display: none;
+  }
+
+  .reset-forecast__site-link {
+    padding: 5px 6px;
+  }
+
+  .reset-forecast__site-link-long {
+    display: none;
+  }
+
+  .reset-forecast__site-link-short {
+    display: inline;
   }
 
   .reset-forecast__metrics {

@@ -2,10 +2,7 @@ export type HealthStatus = "ok" | "warning" | "exhausted" | "unavailable";
 export type WindowState = "normal" | "warning" | "danger" | "exhausted" | "unknown";
 export type UsageSource = "passive" | "active" | "account-extra" | "none";
 export type UsageWindowKey = "5h" | "7d";
-export type CodexResetForecastSourceId =
-  | "codex-runway"
-  | "codex-reset"
-  | "save-me-tibo";
+export type CodexResetForecastSourceId = "codex-reset";
 export type CodexResetForecastState =
   | "unavailable"
   | "baseline"
@@ -314,6 +311,7 @@ export interface CodexResetForecastPayload {
   state: CodexResetForecastState;
   probability24h: number | null;
   probability48h: number | null;
+  lastResetAt: string | null;
   confidence: CodexResetForecastConfidence;
   expectedWindow: CodexResetForecastExpectedWindow | null;
   scope: CodexResetForecastScope;

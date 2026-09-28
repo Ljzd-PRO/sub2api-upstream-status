@@ -46,6 +46,9 @@ describe("translate", () => {
     expect(translate("en", "filters.show")).toBe("Show filters & settings");
     expect(translate("zh-CN", "openai.expand")).toBe("展开 OpenAI 状态详情");
     expect(translate("zh-CN", "forecast.label")).toBe("Codex 提前重置预测");
+    expect(translate("zh-CN", "forecast.lastReset")).toBe("上次全局重置");
+    expect(translate("zh-CN", "forecast.openSite")).toBe("前往预测网站");
+    expect(translate("zh-TW", "forecast.lastReset")).toBe("上次全局重置");
     expect(translate("zh-TW", "forecast.unofficial")).toBe("社群預測 · 非官方");
     expect(translate("en", "account.planUnknown")).toBe("Plan unknown");
   });

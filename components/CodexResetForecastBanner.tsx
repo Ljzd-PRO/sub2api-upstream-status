@@ -4,6 +4,7 @@ import {
   CalendarClock,
   ChevronDown,
   CircleGauge,
+  Clock3,
   CloudOff,
   ExternalLink,
   Radar,
@@ -54,9 +55,24 @@ export function CodexResetForecastBanner({
             <strong>{title}</strong>
           </div>
         </div>
-        <div className="reset-forecast__badges">
-          <span className="reset-forecast__unofficial">{t("forecast.unofficial")}</span>
-          {data?.stale ? <span>{t("forecast.stale")}</span> : null}
+        <div className="reset-forecast__actions">
+          {data?.stale ? (
+            <span className="reset-forecast__stale" role="status" aria-label={t("forecast.stale")} title={t("forecast.stale")}>
+              <Clock3 size={14} aria-hidden />
+              <span>{t("forecast.stale")}</span>
+            </span>
+          ) : null}
+          <a
+            className="reset-forecast__site-link"
+            href="https://codex-reset.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t("forecast.openSite")}
+          >
+            <span className="reset-forecast__site-link-long">{t("forecast.openSite")}</span>
+            <span className="reset-forecast__site-link-short">{t("forecast.openSiteShort")}</span>
+            <ExternalLink size={14} aria-hidden />
+          </a>
         </div>
       </header>
 
@@ -76,17 +92,10 @@ export function CodexResetForecastBanner({
               value={formatProbability(data?.probability48h ?? null, t)}
             />
             <ForecastMetric
-              label={t("forecast.expectedWindow")}
-              value={formatExpectedWindow(data, locale, timeZone, t)}
+              label={t("forecast.lastReset")}
+              value={formatDateTime(data?.lastResetAt ?? null, locale, t("common.unknown"), timeZone)}
+              dateTime={data?.lastResetAt}
               wide
-            />
-            <ForecastMetric
-              label={t("forecast.sourceAgreement")}
-              value={`${data?.agreement.healthySources ?? 0}/${data?.agreement.totalSources ?? 0}`}
-            />
-            <ForecastMetric
-              label={t("forecast.confidence")}
-              value={t(confidenceKey(data?.confidence ?? "low"))}
             />
           </div>
         )}
@@ -97,7 +106,7 @@ export function CodexResetForecastBanner({
               <span>
                 {t("forecast.evidence")}
                 <small>
-                  {data.agreement.independentEvidence} {t("forecast.independentSignals")}
+                  {t("forecast.confidence")} {t(confidenceKey(data.confidence))}
                 </small>
               </span>
               <ChevronDown size={17} aria-hidden />
@@ -135,16 +144,20 @@ export function CodexResetForecastBanner({
 function ForecastMetric({
   label,
   value,
+  dateTime,
   wide = false
 }: {
   label: string;
   value: string;
+  dateTime?: string | null;
   wide?: boolean;
 }) {
   return (
     <div className="reset-forecast__metric" data-wide={wide || undefined}>
       <span>{label}</span>
-      <strong title={value}>{value}</strong>
+      <strong title={value}>
+        {dateTime ? <time dateTime={dateTime}>{value}</time> : value}
+      </strong>
     </div>
   );
 }
@@ -167,10 +180,12 @@ function ForecastSourceRow({
   return (
     <article className="reset-forecast-source" data-status={source.status}>
       <div className="reset-forecast-source__lead">
-        <strong>{source.label}</strong>
+        <strong>{t("forecast.sourceName")}</strong>
         <span>{t(sourceStatusKey(source.status))}</span>
       </div>
-      <p>{source.status === "error" ? t("forecast.sourceRequestFailed") : source.detail}</p>
+      <p>{source.status === "error"
+        ? t("forecast.sourceRequestFailed")
+        : source.detail || t("forecast.noSourceDetail")}</p>
       <div className="reset-forecast-source__meta">
         <span>
           {probability == null
@@ -193,19 +208,6 @@ function ForecastSourceRow({
 
 function formatProbability(value: number | null, t: TFunction): string {
   return value == null ? t("common.noData") : formatPercent(value * 100);
-}
-
-function formatExpectedWindow(
-  data: CodexResetForecastPayload | null,
-  locale: AppLocale,
-  timeZone: string,
-  t: TFunction
-): string {
-  const window = data?.expectedWindow;
-  if (!window) return t("forecast.noExpectedWindow");
-  const start = formatDateTime(window.startAt, locale, t("common.unknown"), timeZone);
-  const end = formatDateTime(window.endAt, locale, t("common.unknown"), timeZone);
-  return window.startAt === window.endAt ? start : `${start} - ${end}`;
 }
 
 function stateIcon(state: CodexResetForecastState) {

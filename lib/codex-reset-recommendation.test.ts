@@ -155,6 +155,7 @@ function forecast({
     state: "likely",
     probability24h,
     probability48h,
+    lastResetAt: null,
     confidence: "medium",
     expectedWindow: expectedAt
       ? { startAt: expectedAt, endAt: expectedAt, precision: "datetime" }

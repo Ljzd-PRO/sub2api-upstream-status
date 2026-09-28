@@ -5,7 +5,6 @@ import {
   getOpenAIStatusConfig,
   getServerConfig,
   parseBooleanFlag,
-  parseCodexResetForecastSources,
   parseUsageWindows
 } from "@/lib/env";
 
@@ -138,10 +137,9 @@ describe("getOpenAIStatusConfig", () => {
 });
 
 describe("getCodexResetForecastConfig", () => {
-  it("uses safe defaults for the public forecast sources", () => {
+  it("uses safe defaults for the forecast", () => {
     expect(getCodexResetForecastConfig({ NODE_ENV: "test" })).toEqual({
       enabled: true,
-      sources: ["codex-runway", "codex-reset", "save-me-tibo"],
       refreshIntervalSeconds: 120,
       requestTimeoutMs: 8000,
       maxAgeSeconds: 1800
@@ -153,14 +151,12 @@ describe("getCodexResetForecastConfig", () => {
       getCodexResetForecastConfig({
         NODE_ENV: "test",
         CODEX_RESET_FORECAST_ENABLED: "false",
-        CODEX_RESET_FORECAST_SOURCES: "save-me-tibo,codex-runway",
         CODEX_RESET_FORECAST_REFRESH_INTERVAL_SECONDS: "5",
         CODEX_RESET_FORECAST_REQUEST_TIMEOUT_MS: "99999",
         CODEX_RESET_FORECAST_MAX_AGE_SECONDS: "120"
       })
     ).toEqual({
       enabled: false,
-      sources: ["codex-runway", "save-me-tibo"],
       refreshIntervalSeconds: 30,
       requestTimeoutMs: 30000,
       maxAgeSeconds: 300
@@ -180,28 +176,19 @@ describe("getCodexResetForecastConfig", () => {
     });
   });
 
-  it("falls back when numeric values or source names are invalid", () => {
+  it("ignores the retired source setting and falls back for invalid numbers", () => {
     expect(
       getCodexResetForecastConfig({
         NODE_ENV: "test",
         CODEX_RESET_FORECAST_REFRESH_INTERVAL_SECONDS: "invalid",
         CODEX_RESET_FORECAST_REQUEST_TIMEOUT_MS: "invalid",
         CODEX_RESET_FORECAST_MAX_AGE_SECONDS: "invalid",
-        CODEX_RESET_FORECAST_SOURCES: "unknown"
+        CODEX_RESET_FORECAST_SOURCES: "codex-runway,save-me-tibo"
       })
     ).toMatchObject({
       refreshIntervalSeconds: 120,
       requestTimeoutMs: 8000,
-      maxAgeSeconds: 1800,
-      sources: ["codex-runway", "codex-reset", "save-me-tibo"]
+      maxAgeSeconds: 1800
     });
-  });
-});
-
-describe("parseCodexResetForecastSources", () => {
-  it("deduplicates supported names in canonical order", () => {
-    expect(
-      parseCodexResetForecastSources("SAVE-ME-TIBO codex-runway save-me-tibo")
-    ).toEqual(["codex-runway", "save-me-tibo"]);
   });
 });
