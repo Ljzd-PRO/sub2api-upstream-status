@@ -136,9 +136,9 @@ function planTypeLabel(planType: string | null, t: TFunction): string {
     case "plus":
       return "Plus";
     case "pro":
-      return "Pro20x";
+      return "Pro200";
     case "prolite":
-      return "Pro5x";
+      return "Pro100";
     case "team":
       return "Team";
     case "business":
