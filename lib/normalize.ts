@@ -3,6 +3,7 @@ import type {
   PanelAccountStatus,
   PanelAccountTotals,
   PanelConcurrency,
+  PanelPermanentCredits,
   PanelResetCredits,
   PanelSummary,
   PanelUsageWindow,
@@ -85,6 +86,7 @@ export function normalizeAccount(
     rateLimitResetAt: account.rate_limit_reset_at || null,
     concurrency: normalizeConcurrency(account),
     resetCredits: normalizeResetCredits(account, openAIQuota, now),
+    permanentCredits: normalizePermanentCredits(account, openAIQuota),
     windows: {
       fiveHour,
       sevenDay
@@ -121,6 +123,24 @@ export function normalizeResetCredits(
     nearestExpiresAt: availableCount && availableCount > 0
       ? nearestFutureExpiration(credits, now)
       : null
+  };
+}
+
+export function normalizePermanentCredits(
+  account: Sub2APIAccount,
+  quota: Sub2APIOpenAIQuotaUsage | null
+): PanelPermanentCredits {
+  const supported = shouldFetchActiveUsage(account);
+  if (!supported) return { supported: false, balance: null, unlimited: false };
+
+  const snapshot = recordFromUnknown(account.extra?.codex_credits_snapshot);
+  const credits = quota?.credits ?? recordFromUnknown(snapshot?.credits);
+  const balance = numberFromUnknown(credits?.balance);
+
+  return {
+    supported: true,
+    balance: balance == null ? null : Math.max(0, balance),
+    unlimited: credits?.unlimited === true
   };
 }
 

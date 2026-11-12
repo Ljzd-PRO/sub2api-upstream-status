@@ -25,6 +25,7 @@ Public read-only Next.js panel for selected sub2api upstream account usage windo
 - OpenAI subscription plan badges next to each account platform
 - Real-time concurrency capacity sync per account
 - Available Codex usage-window reset credits per OpenAI OAuth account
+- Remaining permanent Codex credits per OpenAI OAuth account, with cached quota fallback
 - Official OpenAI service status and an independent, clearly labeled community Codex reset forecast
 - Frontend auto refresh countdown with a per-browser pause switch
 - Automatic language detection with Simplified Chinese, English, and Traditional Chinese

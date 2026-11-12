@@ -7,6 +7,7 @@ import {
   buildSummary,
   normalizeAccount,
   normalizePlanType,
+  normalizePermanentCredits,
   normalizeResetCredits,
   shouldFetchActiveUsage,
   shouldFetchPassiveUsage
@@ -74,6 +75,55 @@ describe("buildOpenAIUsageFromExtra", () => {
 
     expect(usage?.five_hour?.utilization).toBe(0);
     expect(usage?.five_hour?.remaining_seconds).toBe(0);
+  });
+});
+
+describe("normalizePermanentCredits", () => {
+  it("exposes decimal credits from the live quota without confusing them with resets", () => {
+    const status = normalizeAccount(baseAccount(), null, null, now, null, {
+      credits: { balance: "31986.9135760000", has_credits: true, unlimited: false },
+      rate_limit_reset_credits: { available_count: 1 }
+    });
+
+    expect(status.permanentCredits).toEqual({
+      supported: true, balance: 31986.913576, unlimited: false
+    });
+    expect(status.resetCredits.availableCount).toBe(1);
+  });
+
+  it("uses the cached credits snapshot when live credits are unavailable", () => {
+    expect(normalizePermanentCredits(baseAccount({
+      extra: { codex_credits_snapshot: { credits: { balance: "44258.6265935000", unlimited: false } } }
+    }), null)).toEqual({ supported: true, balance: 44258.6265935, unlimited: false });
+  });
+
+  it("keeps a fresh zero instead of restoring an older cached balance", () => {
+    expect(normalizePermanentCredits(baseAccount({
+      extra: { codex_credits_snapshot: { credits: { balance: "500", unlimited: true } } }
+    }), { credits: { balance: "0", has_credits: false, unlimited: false } }))
+      .toEqual({ supported: true, balance: 0, unlimited: false });
+  });
+
+  it("preserves unlimited credits without requiring a numeric balance", () => {
+    expect(normalizePermanentCredits(baseAccount(), { credits: { unlimited: true } }))
+      .toEqual({ supported: true, balance: null, unlimited: true });
+  });
+
+  it.each([null, "", "invalid", "Infinity", Number.NaN])("keeps missing or invalid balance %s unknown", (balance) => {
+    expect(normalizePermanentCredits(baseAccount(), { credits: { balance } }).balance).toBeNull();
+  });
+
+  it("clamps negative credits to zero", () => {
+    expect(normalizePermanentCredits(baseAccount(), { credits: { balance: -1 } }).balance).toBe(0);
+  });
+
+  it("keeps absent credits unknown and hides them for unsupported accounts", () => {
+    expect(normalizePermanentCredits(baseAccount(), null))
+      .toEqual({ supported: true, balance: null, unlimited: false });
+    expect(normalizePermanentCredits(baseAccount({ platform: "anthropic" }), { credits: { balance: 50 } }))
+      .toEqual({ supported: false, balance: null, unlimited: false });
+    expect(normalizePermanentCredits(baseAccount({ type: "apikey" }), { credits: { balance: 50 } }))
+      .toEqual({ supported: false, balance: null, unlimited: false });
   });
 });
 

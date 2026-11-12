@@ -6,6 +6,7 @@ import {
   CalendarClock,
   CheckCircle2,
   CircleOff,
+  Coins,
   Gauge,
   RotateCcw,
   TimerReset
@@ -83,6 +84,38 @@ export function AccountCard({
           timeZone={timeZone}
           t={t}
         />
+      ) : null}
+
+      {account.permanentCredits.supported ? (
+        <section
+          className="permanent-credits"
+          data-state={
+            account.permanentCredits.unlimited || (account.permanentCredits.balance ?? 0) > 0
+              ? "available"
+              : account.permanentCredits.balance == null ? "unknown" : "empty"
+          }
+          aria-label={t("account.permanentCredits")}
+        >
+          <div className="permanent-credits__top">
+            <div className="permanent-credits__label">
+              <Coins size={16} aria-hidden />
+              <span>{t("account.permanentCredits")}</span>
+            </div>
+            <strong>
+              {account.permanentCredits.unlimited
+                ? t("account.creditsUnlimited")
+                : account.permanentCredits.balance == null
+                  ? t("common.noData")
+                  : (
+                    <>
+                      {new Intl.NumberFormat(locale, { maximumFractionDigits: 10 }).format(account.permanentCredits.balance)}
+                      <span className="permanent-credits__unit">credit</span>
+                    </>
+                  )}
+            </strong>
+          </div>
+          <small>{t("account.permanentCreditsHelp")}</small>
+        </section>
       ) : null}
 
       <div className="window-list">

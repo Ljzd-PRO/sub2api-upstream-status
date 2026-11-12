@@ -78,6 +78,11 @@ export interface Sub2APIRateLimitResetCredits {
 export interface Sub2APIOpenAIQuotaUsage {
   plan_type?: string | null;
   rate_limit_reset_credits?: Sub2APIRateLimitResetCredits | null;
+  credits?: {
+    has_credits?: boolean;
+    unlimited?: boolean;
+    balance?: number | string | null;
+  } | null;
 }
 
 export interface Sub2APIAccountStats {
@@ -159,6 +164,12 @@ export interface PanelResetCredits {
   nearestExpiresAt: string | null;
 }
 
+export interface PanelPermanentCredits {
+  supported: boolean;
+  balance: number | null;
+  unlimited: boolean;
+}
+
 export interface PanelUsageWindow {
   key: UsageWindowKey;
   label: string;
@@ -189,6 +200,7 @@ export interface PanelAccountStatus {
   rateLimitResetAt: string | null;
   concurrency: PanelConcurrency;
   resetCredits: PanelResetCredits;
+  permanentCredits: PanelPermanentCredits;
   windows: {
     fiveHour: PanelUsageWindow;
     sevenDay: PanelUsageWindow;
