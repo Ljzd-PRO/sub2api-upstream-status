@@ -797,11 +797,11 @@ function SummaryUsageTile({
 
 function healthRank(health: HealthStatus): number {
   switch (health) {
-    case "exhausted":
+    case "ok":
       return 0;
-    case "unavailable":
-      return 1;
     case "warning":
+      return 1;
+    case "exhausted":
       return 2;
     default:
       return 3;

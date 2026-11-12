@@ -17,6 +17,7 @@ Public read-only Next.js panel for selected sub2api upstream account usage windo
 ## Features
 
 - Read-only public dashboard for selected upstream accounts
+- Accounts automatically ordered by health: ready, warning, exhausted, then unavailable
 - 5 hours and 7 days usage windows with reset time and countdown
 - Time-progress recommendations, continuously adjusted by cross-checked early-reset probabilities
 - The 7-day usage track overlays current usage (solid), recommended usage (pale green), and elapsed window share (inset circular dots)
